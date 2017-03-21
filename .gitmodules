@@ -1,0 +1,9 @@
+[submodule "externals/plibsys"]
+	path = externals/plibsys
+	url = https://github.com/saprykin/plibsys.git
+[submodule "test/externals/catch"]
+	path = test/externals/catch
+	url = https://github.com/philsquared/Catch.git
+[submodule "externals/ltalloc"]
+	path = externals/ltalloc
+	url = https://github.com/r-lyeh/ltalloc.git
