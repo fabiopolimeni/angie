@@ -1,5 +1,5 @@
 // Copyright (c) 2017 Fabio Polimeni
-// Creation date: 20/03/2017
+// Created on: 20/03/2017
 //
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
@@ -39,19 +39,15 @@ namespace angie {
                  * Reallocate memory from the pointer provided.
                  *
                  * This function behaves as realloc() in standard C11.
-                 * The alignment is respected on the new pointer returned even
-                 * when it doesn't match the one (if) provided when the memory
-                 * was initially allocated.
                  * @param ptr Memory pointer of initial allocated memory.
                  * I can be null, and a new one will be allocated.
-                 * @param size The new size of memory we want to requested.
-                 * @param align Returned pointer will be aligned by this value
+                 * @param sz The new size of memory we want to requested.
+                 * @param al Alignment to use in case different from the
+                 * one passed in when the ptr was initially allocated.
                  * @return Pointer to the beginning of the memory allocated.
-                 * @note Default alignment ANGIE_DEFAULT_MEMORY_ALIGNMENT.
                  * @note Thread-safe.
                  */
-                void* reallocate(void* ptr, types::size size,
-                                 types::size align);
+                void* reallocate(void* ptr, types::size sz, types::size al);
 
                 /**
                  * Flush global memory.
@@ -65,6 +61,15 @@ namespace angie {
                  * @note Thread-safe.
                  */
                 void flush();
+
+                /**
+                 * Retrieve the size of the pointer at allocation time
+                 *
+                 * @param ptr Memory pointer previously allocated
+                 * @return The size of the allocated pointer if not null
+                 * @note Thread-safe.
+                 */
+                types::size sizeOf(void* ptr);
 
             }
         }

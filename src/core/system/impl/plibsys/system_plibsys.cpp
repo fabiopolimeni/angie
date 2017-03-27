@@ -1,5 +1,5 @@
 // Copyright (c) 2017 Fabio Polimeni
-// Creation date: 18/03/2017
+// Created on: 18/03/2017
 //
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
@@ -14,7 +14,7 @@ extern "C" ppointer pmem_alloc (psize nbytes) {
 }
 
 extern "C" ppointer pmem_realloc (ppointer block, psize nbytes) {
-    return (ppointer) angie::core::memory::reallocate(block, nbytes);
+    return (ppointer) angie::core::memory::reallocate(block, nbytes, 0);
 }
 
 extern "C" void pmem_free (ppointer block) {

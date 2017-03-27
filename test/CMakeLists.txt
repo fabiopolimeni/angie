@@ -1,9 +1,17 @@
 include_directories(externals/catch/include)
 
-# Test files
-add_executable(angie_tests_system
-        angie/core/system/tests_system.cpp)
-target_link_libraries(angie_tests_system angie_core)
-add_test(NAME angie_tests_system COMMAND angie_tests_system)
-set_target_properties(angie_tests_system PROPERTIES FOLDER
-        "angie/tests/angie/core/system")
+# Memory tests
+add_executable(angie_memory_tests
+        angie/core/memory/memory_tests.cpp)
+target_link_libraries(angie_memory_tests angie_core)
+add_test(NAME angie_memory_test COMMAND angie_memory_test)
+set_target_properties(angie_memory_tests PROPERTIES FOLDER
+        "angie/core/memory")
+
+# System tests
+add_executable(angie_system_tests
+        angie/core/system/system_tests.cpp)
+target_link_libraries(angie_system_tests angie_core)
+add_test(NAME angie_system_tests COMMAND angie_system_tests)
+set_target_properties(angie_system_tests PROPERTIES FOLDER
+        "angie/core/system")

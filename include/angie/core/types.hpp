@@ -1,5 +1,5 @@
 // Copyright (c) 2017 Fabio Polimeni
-// Creation date: 19/03/2017
+// Created on: 19/03/2017
 //
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
@@ -21,6 +21,9 @@ namespace angie {
 
             using int_32 = int32_t;
             using uint_32 = uint32_t;
+
+            using int_64 = int64_t;
+            using uint_64 = uint64_t;
 
             using char_8 = char;
             using char_16 = char16_t;

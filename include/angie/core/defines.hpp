@@ -1,5 +1,6 @@
 // Copyright (c) 2017 Fabio Polimeni
-// 18/03/2017
+// Created on: 18/03/2017
+//
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
@@ -203,6 +204,69 @@
 #else
 #  define ANGIE_NO_RETURN
 #endif
+
+#if defined(ANGIE_CC_GNU)
+#include <cstdint> //for SIZE_MAX
+#include <climits> //for UINT_MAX
+#elif defined(ANGIE_CC_MSVC)
+#include <climits> //for UINT_MAX and SIZE_MAX
+#else
+#error Unsupported environment
+#endif
+
+#if UINTPTR_MAX == UINT32_MAX
+/**
+ * 32 bit architecture
+ * @def ANGIE_ARCH_32
+ * @since 0.0.1
+ */
+#define ANGIE_ARCH_32
+#define ANGIE_PTR_SIZE 4
+#elif UINTPTR_MAX == UINT64_MAX
+/**
+ * 64 bit architecture
+ * @def ANGIE_ARCH_64
+ * @since 0.0.1
+ */
+#define ANGIE_ARCH_64
+#define ANGIE_PTR_SIZE 8
+#else
+#error Unsupported architecture
+#endif
+
+/**
+ * Bit scan forward
+ *
+ * @def bsf(r, v)
+ * @param r The position of first bit set in "v"
+ * @param v Mask to evaluate when looking for the first set it
+ * @since 0.0.1
+ */
+#if defined(ANGIE_CC_CLANG) || defined(ANGIE_CC_GNU)
+#ifdef ANGIE_ARCH_64
+#define bsf(r, v) r = __builtin_ctz(v)
+#else
+#define bsf(r, v) r = __builtin_ctzll(v)
+#endif
+#elif defined(ANGIE_CC_MSVC) || defined(ANGIE_CC_INTEL)
+#include <intrin.h>
+#ifdef ANGIE_ARCH_64
+#define bsf(r, v) _BitScanForward64((unsigned long*)&r, v)
+#else
+#define bsf(r, v) _BitScanForward((unsigned long*)&r, v)
+#endif
+#endif
+
+/**
+ * Whether or not the given pointer is aligned
+ *
+ * @def bsf(r, v)
+ * @param r The position of first bit set in "v"
+ * @param v Mask to evaluate when looking for the first set it
+ * @since 0.0.1
+ */
+#define is_aligned(POINTER, BYTE_COUNT) \
+    (((uintptr_t)(const void *)(POINTER)) % (BYTE_COUNT) == 0)
 
 /**
  * @def ANGIE_END_DECLS

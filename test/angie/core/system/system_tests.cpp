@@ -1,5 +1,5 @@
 // Copyright (c) 2017 Fabio Polimeni
-// Creation date: 19/03/2017
+// Created on: 19/03/2017
 //
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
@@ -9,13 +9,16 @@
 
 #include "angie/core/system/system.hpp"
 
-TEST_CASE( "System initialisation", "[init]" )
+TEST_CASE( "System tests", "[system]" )
 {
-    // Initialise the system
     using namespace angie::core;
-    REQUIRE(system::init(nullptr) == system::error_e::ok);
 
-    // Shutdown the system
-    system::shutdown();
+    SECTION("System initialisation") {
+        REQUIRE(system::init(nullptr) == system::error_e::ok);
+    }
+
+    SECTION("System shutdown") {
+        system::shutdown();
+    }
 }
 
