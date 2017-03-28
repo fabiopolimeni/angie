@@ -30,6 +30,11 @@ namespace angie {
             namespace impl {
 
                 void* allocate(types::size size, types::size align) {
+                    // Always guarantee a minimum alignment
+                    // as big as the size of a pointer
+                    if (align < sizeof(types::uint_ptr))
+                        align = sizeof(types::uint_ptr);
+
                     return ltmemalign(align, size);
                 }
 
@@ -40,20 +45,21 @@ namespace angie {
                 void* reallocate(void* ptr, types::size sz, types::size al) {
                     // Handle special cases
                     if (!ptr) return ltmemalign(sz, al);
-                    if (!sz) return ltfree(ptr), (void *)0;
+                    if (!sz) return ltfree(ptr), nullptr;
 
                     // If pointer and size are valid, then, check
                     // the current state of the given pointer, and
                     // if the new size and alignment
                     size_t osz = ltmsize(ptr);
+                    size_t oal = utils::alignmentOf((uintptr_t) ptr);
                     if (sz <= osz) {
-                        size_t oal = utils::alignment_of((uintptr_t)ptr);
-                        if (oal <= al) {
+                        if (oal >= al) {
                             return ptr;
                         }
                     }
 
-                    void* nptr = ltmemalign(sz, al);
+                    size_t nal = (oal < al) ? al : oal;
+                    void* nptr = ltmemalign(sz, nal);
                     if (!memmove(nptr, ptr, osz)) {
                         ltfree(nptr);
                     }

@@ -258,15 +258,15 @@
 #endif
 
 /**
- * Whether or not the given pointer is aligned
+ * Whether or not the given pointer "p" is aligned to, or multiple of, "c"
  *
- * @def bsf(r, v)
- * @param r The position of first bit set in "v"
- * @param v Mask to evaluate when looking for the first set it
+ * @def is_aligned(p, c)
+ * @param p The pointer we want to test the alignment of
+ * @param c The count of bytes we check the pointer is aligned to
  * @since 0.0.1
  */
-#define is_aligned(POINTER, BYTE_COUNT) \
-    (((uintptr_t)(const void *)(POINTER)) % (BYTE_COUNT) == 0)
+#define is_aligned(p, c) \
+    (((uintptr_t)(const void *)(p)) % (c) == 0)
 
 /**
  * @def ANGIE_END_DECLS

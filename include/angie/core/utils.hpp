@@ -14,14 +14,24 @@ namespace angie {
         namespace utils {
 
             inline
-            size_t alignment_of(uintptr_t ptr) {
-                size_t out_align = 0;
+            types::size alignmentOf(types::uint_ptr ptr) {
+                types::size out_align = 0;
 
                 if (ptr) {
                     bsf(out_align, ptr);
                 }
 
                 return 1 << out_align;
+            }
+
+            inline constexpr
+            bool isPowerOfTwo(types::size a) {
+                return !(a & (a - 1));
+            }
+
+            inline constexpr
+            bool isMultipleOf(types::size n, types::size d) {
+                return !(n % d);
             }
 
         }

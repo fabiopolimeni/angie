@@ -6,6 +6,7 @@
 
 #include <cstdlib> // malloc/free
 #include <cstring> // memmove
+#include <malloc.h>
 
 #include "../global_impl.hpp"
 #include "angie/core/utils.hpp"
@@ -59,20 +60,21 @@ namespace {
     void* realloc_aligned(void* ptr, size_t sz, size_t al) {
         // Handle special cases
         if (!ptr) return alloc_aligned(sz, al);
-        if (!sz) return free_aligned(ptr), (void *)0;
+        if (!sz) return free_aligned(ptr), nullptr;
 
         // If pointer and size are valid, then, check
         // the current state of the given pointer, and
         // if the new size and alignment
         size_t osz = memory_size(ptr);
+        size_t oal = angie::core::utils::alignmentOf((uintptr_t)ptr);
         if (sz <= osz) {
-            size_t oal = angie::core::utils::alignment_of((uintptr_t)ptr);
-            if (oal <= al) {
+            if (oal >= al) {
                 return ptr;
             }
         }
 
-        void* nptr = alloc_aligned(sz, al);
+        size_t nal = (oal < al) ? al : oal;
+        void* nptr = alloc_aligned(sz, nal);
         if (!memmove(nptr, ptr, osz)) {
             free_aligned(nptr);
         }
