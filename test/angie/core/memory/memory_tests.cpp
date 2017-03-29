@@ -39,7 +39,15 @@ TEST_CASE( "Memory allocation", "[allocation]" )
 
     SECTION("No throw memory overflow") {
         uint_8* a = nullptr;
-        REQUIRE_NOTHROW(a = new uint_8[1024*1024*1024*1024ULL]);
+
+		// Workaround for a stupid VC cross-compiler 32bit->64bit bug.
+		// VS does use the cross-compiler when launched from the editor,
+        // even when compiling a solution with a 64 bit configuration.
+		// http://stackoverflow.com/questions/19803162/array-size-error-x64-process
+
+		types::size sz = types::size(1) << 43;  // sz is non-const
+
+        REQUIRE_NOTHROW(a = new uint_8[sz]);
         REQUIRE(a == nullptr);
     }
 
@@ -51,8 +59,10 @@ TEST_CASE( "Memory allocation", "[allocation]" )
         // Write some data to the buffer to verify
         // that it will be carried on correctly.
         auto init_sz = memory::sizeOf(b);
-        char init_str[32] = {0};
-        sprintf(init_str, "Initial buffer size: %d", init_sz);
+
+        static const size_t str_sz = 32;
+        char init_str[str_sz] = {0};
+        sprintf_s(init_str, str_sz, "Initial buffer size: %zd", init_sz);
         memcpy(b, init_str, 32);
 
         void* c = memory::reallocate(b, 3*1024);

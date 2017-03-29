@@ -209,6 +209,7 @@
 #include <cstdint> //for SIZE_MAX
 #include <climits> //for UINT_MAX
 #elif defined(ANGIE_CC_MSVC)
+#include <cstdint> //for SIZE_MAX
 #include <climits> //for UINT_MAX and SIZE_MAX
 #else
 #error Unsupported environment

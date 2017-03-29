@@ -1,5 +1,9 @@
 include_directories(externals/catch/include)
 
+if(MINGW)
+    add_definitions(-DMINGW_HAS_SECURE_API=1)
+endif()
+
 # Memory tests
 add_executable(angie_memory_tests
         angie/core/memory/memory_tests.cpp)

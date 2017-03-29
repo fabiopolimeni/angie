@@ -21,7 +21,7 @@ namespace angie {
                     bsf(out_align, ptr);
                 }
 
-                return 1 << out_align;
+                return types::size(1) << out_align;
             }
 
             inline constexpr

@@ -13,6 +13,10 @@
 
 namespace {
 
+#ifdef ANGIE_CC_MSVC
+#pragma warning(disable:4146) // negate an unsigned integer
+#endif
+
     static inline
     void * alloc_aligned(size_t sz, size_t al) {
         // Alignment must be a power of two.
@@ -50,9 +54,9 @@ namespace {
     static inline
     size_t memory_size(void* ptr) {
 #if defined(ANGIE_CC_MSVC) || defined(ANGIE_CC_MINGW)
-        return _msize(ptr);
+        return _msize(((void**)ptr)[-1]);
 #else
-        return malloc_usable_size(ptr);
+        return malloc_usable_size(((void**)ptr)[-1]);
 #endif
     }
 
