@@ -4,6 +4,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+#define __STDC_WANT_LIB_EXT1__
 #include <cstdio>
 
 #define CATCH_CONFIG_MAIN
