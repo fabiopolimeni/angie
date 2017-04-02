@@ -16,7 +16,6 @@ namespace angie {
                 /**
                  * Initializes the whole system.
                  *
-                 *
                  * @param cb Report callback function.
                  * @return error_e::ok if no error any of the error_e otherwise.
                  * @see error_e
