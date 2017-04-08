@@ -7,3 +7,6 @@
 [submodule "externals/ltalloc"]
 	path = externals/ltalloc
 	url = https://github.com/r-lyeh/ltalloc.git
+[submodule "externals/libcpuid"]
+	path = externals/libcpuid
+	url = https://github.com/anrieff/libcpuid.git
