@@ -10,3 +10,6 @@
 [submodule "externals/libcpuid"]
 	path = externals/libcpuid
 	url = https://github.com/anrieff/libcpuid.git
+[submodule "externals/stb"]
+	path = externals/stb
+	url = https://github.com/nothings/stb.git
