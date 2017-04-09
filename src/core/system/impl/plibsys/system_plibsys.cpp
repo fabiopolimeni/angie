@@ -26,7 +26,7 @@ namespace angie {
         namespace system {
             namespace impl {
 
-                error_e init(report::callback *cb) {
+                error init(report::callback *cb) {
 
                     PMemVTable vtable;
                     vtable.free    = pmem_free;
@@ -35,7 +35,7 @@ namespace angie {
 
                     p_libsys_init_full(&vtable);
 
-                    return error_e::ok;
+                    return error::ok;
                 }
 
                 void shutdown() {

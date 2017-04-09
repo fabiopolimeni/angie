@@ -14,11 +14,11 @@ namespace angie {
         namespace utils {
 
             inline
-            types::size alignmentOf(types::uint_ptr ptr) {
+            types::size alignmentOf(types::uintptr ptr) {
                 types::size out_align = 0;
 
                 if (ptr) {
-                    bsf(out_align, ptr);
+                    angie_bsf(out_align, ptr);
                 }
 
                 return types::size(1) << out_align;

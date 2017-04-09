@@ -14,7 +14,10 @@ set(HEADER_FILES
 
 set(INTERFACE_FILES
         ${ANGIE_INCLUDE_DIR}/angie/core/memory/global.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/system/system.hpp)
+        ${ANGIE_INCLUDE_DIR}/angie/core/memory/allocator.hpp
+        ${ANGIE_INCLUDE_DIR}/angie/core/containers/array.hpp
+        ${ANGIE_INCLUDE_DIR}/angie/core/system/system.hpp
+        ${ANGIE_INCLUDE_DIR}/angie/core/system/cpu_info.hpp)
 
 set(SOURCE_FILES
         memory/global.cpp

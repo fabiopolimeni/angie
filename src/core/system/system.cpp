@@ -11,7 +11,7 @@ namespace angie {
     namespace core {
         namespace system {
 
-            error_e init(report::callback *cb) {
+            error init(report::callback *cb) {
                 return impl::init(cb);
             }
 

@@ -12,7 +12,7 @@ namespace angie {
     namespace core {
         namespace system {
 
-            enum class error_e
+            enum class error
             {
                 ok,
                 generic_system_error,
@@ -21,7 +21,7 @@ namespace angie {
 
             namespace report
             {
-                enum class level_e
+                enum class level
                 {
                     info,
                     debug,
@@ -31,8 +31,8 @@ namespace angie {
                     fatal
                 };
  
-                using callback = void (level_e level,
-                                       const types::char_8* msg);
+                using callback = void (level lvl,
+                                       const types::char8* msg);
             }
             
             /**
@@ -44,7 +44,7 @@ namespace angie {
              * @see report::callback()
              * @since 0.0.1
              */
-            error_e init(report::callback* cb);
+            error init(report::callback* cb);
 
             /**
              * Properly shuts down the system.

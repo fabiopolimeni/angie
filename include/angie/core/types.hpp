@@ -13,24 +13,26 @@ namespace angie {
     namespace core {
         namespace types {
 
-            using int_8 = int8_t;
-            using uint_8 = uint8_t;
+            using boolean = bool;
 
-            using int_16 = int16_t;
-            using uint_16 = uint16_t;
+            using int8 = int8_t;
+            using uint8 = uint8_t;
 
-            using int_32 = int32_t;
-            using uint_32 = uint32_t;
+            using int16 = int16_t;
+            using uint16 = uint16_t;
 
-            using int_64 = int64_t;
-            using uint_64 = uint64_t;
+            using int32 = int32_t;
+            using uint32 = uint32_t;
 
-            using char_8 = char;
-            using char_16 = char16_t;
-            using char_32 = char32_t;
+            using int64 = int64_t;
+            using uint64 = uint64_t;
 
-            using int_ptr = intptr_t;
-            using uint_ptr = uintptr_t;
+            using char8 = char;
+            using char16 = char16_t;
+            using char32 = char32_t;
+
+            using intptr = intptr_t;
+            using uintptr = uintptr_t;
 
             using size = size_t;
 

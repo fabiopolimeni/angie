@@ -33,22 +33,27 @@ TEST_CASE( "Memory allocation", "[allocation]" )
     }
 
     SECTION("Simple C++ style allocations") {
-        int_8 * m = new int_8;
+        int8 * m = new int8;
         REQUIRE(m != nullptr);
         delete m;
     }
 
     SECTION("No throw memory overflow") {
-        uint_8* a = nullptr;
+        uint8* a = nullptr;
 
 		// Workaround for a stupid VC cross-compiler 32bit->64bit bug.
 		// VS does use the cross-compiler when launched from the editor,
         // even when compiling a solution with a 64 bit configuration.
 		// http://stackoverflow.com/questions/19803162/array-size-error-x64-process
 
-		types::size sz = types::size(1) << 43;  // sz is non-const
+		types::size sz = types::size(1) <<
+                                        #ifdef ANGIE_ARCH_64
+                                        43;
+                                        #else
+                                        30;
+                                        #endif
 
-        REQUIRE_NOTHROW(a = new uint_8[sz]);
+        REQUIRE_NOTHROW(a = new uint8[sz]);
         REQUIRE(a == nullptr);
     }
 

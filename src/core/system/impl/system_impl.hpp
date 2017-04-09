@@ -22,7 +22,7 @@ namespace angie {
                  * @see report::callback()
                  * @since 0.0.1
                  */
-                error_e init(report::callback *cb);
+                error init(report::callback *cb);
 
                 /**
                  * Properly shuts down the system.

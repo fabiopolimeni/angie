@@ -14,7 +14,7 @@ TEST_CASE( "System tests", "[system]" )
     using namespace angie::core;
 
     SECTION("System initialisation") {
-        REQUIRE(system::init(nullptr) == system::error_e::ok);
+        REQUIRE(system::init(nullptr) == system::error::ok);
     }
 
     SECTION("System shutdown") {

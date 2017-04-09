@@ -236,18 +236,32 @@
 #endif
 
 /**
+ * @def ANGIE_END_DECLS
+ * @brief Closes .h file declarations to be exported as C functions, should be
+ * always used after #ANGIE_BEGIN_DECLS.
+ * @since 0.0.1
+ */
+#ifdef __cplusplus
+#  define ANGIE_BEGIN_DECLS extern "C" {
+#  define ANGIE_END_DECLS }
+#else
+#  define ANGIE_BEGIN_DECLS
+#  define ANGIE_END_DECLS
+#endif
+
+/**
  * Bit scan forward
  *
- * @def bsf(r, v)
+ * @def angie_bsf(r, v)
  * @param r The position of first bit set in "v"
  * @param v Mask to evaluate when looking for the first set it
  * @since 0.0.1
  */
 #if defined(ANGIE_CC_CLANG) || defined(ANGIE_CC_GNU)
 #ifdef ANGIE_ARCH_64
-#define bsf(r, v) r = __builtin_ctz(v)
+#define angie_bsf(r, v) r = __builtin_ctz(v)
 #else
-#define bsf(r, v) r = __builtin_ctzll(v)
+#define angie_bsf(r, v) r = __builtin_ctzll(v)
 #endif
 #elif defined(ANGIE_CC_MSVC) || defined(ANGIE_CC_INTEL)
 #include <intrin.h>
@@ -261,24 +275,34 @@
 /**
  * Whether or not the given pointer "p" is aligned to, or multiple of, "c"
  *
- * @def is_aligned(p, c)
+ * @def angie_is_aligned(p, c)
  * @param p The pointer we want to test the alignment of
  * @param c The count of bytes we check the pointer is aligned to
  * @since 0.0.1
  */
-#define is_aligned(p, c) \
+#define angie_is_aligned(p, c) \
     (((uintptr_t)(const void *)(p)) % (c) == 0)
 
 /**
- * @def ANGIE_END_DECLS
- * @brief Closes .h file declarations to be exported as C functions, should be
- * always used after #ANGIE_BEGIN_DECLS.
- * @since 0.0.1
+ * As used in the linux kernel.
+ * A macro that expands to 1 if a preprocessor value
+ * was defined to 1, and 0 if it was not defined or
+ * defined to an other value.
+ *
+ * E.g.
+ * Can be used in preprocessor macros:
+ * #if angie_is_defined(SOMETHING)
+ * ...
+ * #endif
+ *
+ * Or even directly in the code.
+ * Same effect but looks better.
+ * if (angie_is_defined(SOMETHING)) {
+ * ...
+ * }
  */
-#ifdef __cplusplus
-#  define ANGIE_BEGIN_DECLS extern "C" {
-#  define ANGIE_END_DECLS }
-#else
-#  define ANGIE_BEGIN_DECLS
-#  define ANGIE_END_DECLS
-#endif
+#define angie_is_defined(macro) IS_DEFINED_(macro)
+#define MACROTEST_1 ,
+#define IS_DEFINED_(value) IS_DEFINED__(MACROTEST_##value)
+#define IS_DEFINED__(comma) IS_DEFINED___(comma 1, 0)
+#define IS_DEFINED___(_, v, ...) v
