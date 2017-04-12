@@ -13,3 +13,6 @@
 [submodule "externals/stb"]
 	path = externals/stb
 	url = https://github.com/nothings/stb.git
+[submodule "externals/dbgbtools"]
+	path = externals/dbgbtools
+	url = https://github.com/wc-duck/dbgtools.git
