@@ -4,12 +4,13 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include <cstdlib> // malloc/free
 #include <cstring> // memmove
+#include <cstdlib> // malloc/free
 #include <malloc.h>
 
 #include "../global_impl.hpp"
 #include "angie/core/utils.hpp"
+#include "angie/core/memory/manipulation.hpp"
 
 namespace {
 
@@ -67,10 +68,11 @@ namespace {
         if (!sz) return free_aligned(ptr), nullptr;
 
         // If pointer and size are valid, then, check
-        // the current state of the given pointer, and
-        // if the new size and alignment
+        // the current state of the given pointer, and,
+        // if the new size and alignment are less or equal
+        // to the original ones, then, just return the original pointer.
         size_t osz = memory_size(ptr);
-        size_t oal = angie::core::utils::alignmentOf((uintptr_t)ptr);
+        size_t oal = angie::core::utils::alignment_of((uintptr_t) ptr);
         if (sz <= osz) {
             if (oal >= al) {
                 return ptr;
@@ -79,11 +81,22 @@ namespace {
 
         size_t nal = (oal < al) ? al : oal;
         void* nptr = alloc_aligned(sz, nal);
-        if (!memmove(nptr, ptr, osz)) {
-            free_aligned(nptr);
+
+        // Memory move can't cope with null pointers, as
+        // it would result into an undefined behaviour in
+        // release mode, or would result into an assert
+        // in debug. Therefore, we need to intercept an
+        // eventual memory allocation failure, and return
+        // a null pointer.
+        if (nptr) {
+			size_t nsz = osz > sz ? sz : osz;
+            if (!memmove(nptr, ptr, nsz)) {
+                free_aligned(nptr);
+            }
+
+            free_aligned(ptr);
         }
 
-        free_aligned(ptr);
         return nptr;
     }
 

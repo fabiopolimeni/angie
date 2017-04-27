@@ -21,9 +21,9 @@ namespace angie {
                 using vtb_realloc = void* (void* ptr, types::size sz,
                                            types::size al);
 
-                vtb_alloc alloc;
-                vtb_free free;
-                vtb_realloc realloc;
+                vtb_alloc* const alloc;
+                vtb_free* const free;
+                vtb_realloc* const realloc;
             };
 
             /**
@@ -33,7 +33,7 @@ namespace angie {
              * memory::allocate(), memory::deallocate() and memory::reallocate()
              * @return System default allocator;
              */
-            allocator* get_default();
+            const allocator* get_default_allocator();
 
         }
     }

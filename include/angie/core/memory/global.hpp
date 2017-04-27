@@ -43,7 +43,9 @@ namespace angie {
              * This function behaves mostly as realloc() in standard C11.
              * The difference is in that, if the alignment passed in differs
              * from the one originally used when the pointer was initially
-             * allocated,then, it will be overruled by "align".
+             * allocated, then, it will be overruled by the new alignment.
+             * If the function fails while re-allocating a new pointer, a null
+             * pointer is returned and the original `ptr` is not altered.
              *
              * @param ptr Memory pointer of initial allocated memory.
              * I can be null, and a new one will be allocated.

@@ -250,25 +250,56 @@
 #endif
 
 /**
- * Bit scan forward
+ * Bit scan forward - Count trailing zeroes
  *
  * @def angie_bsf(r, v)
- * @param r The position of first bit set in "v"
- * @param v Mask to evaluate when looking for the first set it
+ * @param r The position of the LSB set in "v"
+ * @param v Mask to evaluate when looking for the first set
  * @since 0.0.1
  */
 #if defined(ANGIE_CC_CLANG) || defined(ANGIE_CC_GNU)
 #ifdef ANGIE_ARCH_64
 #define angie_bsf(r, v) r = __builtin_ctz(v)
+#define angie_ctz(r, v) r = __builtin_ctz(v)
 #else
 #define angie_bsf(r, v) r = __builtin_ctzll(v)
+#define angie_ctz(r, v) r = __builtin_ctzll(v)
 #endif
 #elif defined(ANGIE_CC_MSVC) || defined(ANGIE_CC_INTEL)
 #include <intrin.h>
 #ifdef ANGIE_ARCH_64
-#define bsf(r, v) _BitScanForward64((unsigned long*)&r, v)
+#define angie_bsf(r, v) _BitScanForward64((unsigned long*)&r, v)
+#define angie_ctz(r, v) _BitScanForward64((unsigned long*)&r, v)
 #else
-#define bsf(r, v) _BitScanForward((unsigned long*)&r, v)
+#define angie_bsf(r, v) _BitScanForward((unsigned long*)&r, v)
+#define angie_bsf(r, v) _BitScanForward((unsigned long*)&r, v)
+#endif
+#endif
+
+/**
+ * Bit scan reverse - Count leading zeroes
+ *
+ * @def angie_bsr(r, v)
+ * @param r The position of the MSB set in "v"
+ * @param v Mask to evaluate when looking for the first set
+ * @since 0.0.1
+ */
+#if defined(ANGIE_CC_CLANG) || defined(ANGIE_CC_GNU)
+#ifdef ANGIE_ARCH_64
+#define angie_bsr(r, v) r = (__builtin_clz(v) ^ 31)
+#define angie_clz(r, v) r = (__builtin_clz(v) ^ 31)
+#else
+#define angie_bsr(r, v) r = (__builtin_clzll(v) ^ 63)
+#define angie_clz(r, v) r = (__builtin_clzll(v) ^ 63)
+#endif
+#elif defined(ANGIE_CC_MSVC) || defined(ANGIE_CC_INTEL)
+#include <intrin.h>
+#ifdef ANGIE_ARCH_64
+#define angie_bsr(r, v) _BitScanReverse64((unsigned long*)&r, v)
+#define angie_clz(r, v) _BitScanReverse64((unsigned long*)&r, v)
+#else
+#define angie_bsr(r, v) _BitScanReverse((unsigned long*)&r, v)
+#define angie_clz(r, v) _BitScanReverse((unsigned long*)&r, v)
 #endif
 #endif
 
@@ -301,8 +332,20 @@
  * ...
  * }
  */
-#define angie_is_defined(macro) IS_DEFINED_(macro)
+#define angie_defined(macro) IS_DEFINED_(macro)
 #define MACROTEST_1 ,
 #define IS_DEFINED_(value) IS_DEFINED__(MACROTEST_##value)
 #define IS_DEFINED__(comma) IS_DEFINED___(comma 1, 0)
 #define IS_DEFINED___(_, v, ...) v
+
+#ifdef __cplusplus
+#   ifndef restrict
+#       if defined(ANGIE_CC_MSVC) || defined(ANGIE_CC_INTEL)
+#       define ANGIE_RESTRICT __restrict
+#       elif defined(ANGIE_CC_CLANG) || defined(ANGIE_CC_GNU)
+#       define ANGIE_RESTRICT __restrict__
+#       else
+#       define ANGIE_RESTRICT
+#       endif
+#   endif
+#endif

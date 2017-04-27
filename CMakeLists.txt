@@ -21,6 +21,7 @@ set(CPACK_PACKAGE_VERSION_BUILD ${BUILD_TIME})
 option(angie_config_profile "Use profile configuration" OFF)
 option(angie_memory_global_ltalloc "Use ltalloc for global memory" OFF)
 option(angie_system_plibsys "Use plibsys as base system library" ON)
+option(angie_debug_tools "Use programmatic debug tools" OFF)
 
 # Profile configuration
 if (angie_config_profile)
@@ -32,9 +33,20 @@ set(ANGIE_PROJECT_DIR ${CMAKE_SOURCE_DIR})
 set(ANGIE_INCLUDE_DIR ${ANGIE_PROJECT_DIR}/include)
 set(ANGIE_SOURCE_DIR ${ANGIE_PROJECT_DIR}/src)
 
-# Include directories of the dependencies
+# Include directories of dependencies
 include_directories(include)
 include_directories(externals)
+
+# Debug tools
+# Normally you want debug programmatic tools only on debug,
+# although, you can switch to any build type you like,
+# or combine them E.g. "Debug|Profile"
+message(STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE})
+if (CMAKE_BUILD_TYPE MATCHES "Debug")
+    set(angie_debug_tools ON)
+    include_directories(externals/dbgtools/include)
+    add_definitions(-D_DEBUG_TOOLS)
+endif()
 
 # Add lib core directory
 add_subdirectory(src/core)

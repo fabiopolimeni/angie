@@ -18,11 +18,13 @@
 // while removing it from the source file list.
 // I have opted for the former.
 
-extern void   ltfree(void*);
-extern void*  ltrealloc(void *, size_t);
-extern void*  ltmemalign(size_t, size_t);
-extern void   ltsqueeze(size_t pad); // return memory to system
-extern size_t ltmsize(void*);
+//extern "C" void   ltfree(void*);
+//extern "C" void*  ltrealloc(void *, size_t);
+//extern "C" void*  ltmemalign(size_t, size_t);
+//extern "C" void   ltsqueeze(size_t pad); // return memory to system
+//extern "C" size_t ltmsize(void*);
+
+#include "ltalloc/ltalloc.h"
 
 namespace angie {
     namespace core {
@@ -32,8 +34,8 @@ namespace angie {
                 void* allocate(types::size size, types::size align) {
                     // Always guarantee a minimum alignment
                     // as big as the size of a pointer
-                    if (align < sizeof(types::uint_ptr))
-                        align = sizeof(types::uint_ptr);
+                    if (align < sizeof(types::uintptr))
+                        align = sizeof(types::uintptr);
 
                     return ltmemalign(align, size);
                 }
@@ -51,7 +53,7 @@ namespace angie {
                     // the current state of the given pointer, and
                     // if the new size and alignment
                     size_t osz = ltmsize(ptr);
-                    size_t oal = utils::alignmentOf((uintptr_t) ptr);
+                    size_t oal = utils::alignment_of((uintptr_t) ptr);
                     if (sz <= osz) {
                         if (oal >= al) {
                             return ptr;
@@ -60,11 +62,21 @@ namespace angie {
 
                     size_t nal = (oal < al) ? al : oal;
                     void* nptr = ltmemalign(sz, nal);
-                    if (!memmove(nptr, ptr, osz)) {
-                        ltfree(nptr);
+
+                    // memory move can't cope with null pointers,
+                    // and it would be an undefined behaviour in
+                    // release mode, or would result into an assert
+                    // in debug. Therefore, we need to intercept an
+                    // eventual memory allocation failure, while
+                    // returning and invalid null pointer.
+                    if (nptr) {
+                        if (!memmove(nptr, ptr, osz)) {
+                            ltfree(nptr);
+                        }
+
+                        ltfree(ptr);
                     }
 
-                    ltfree(ptr);
                     return nptr;
                 }
 

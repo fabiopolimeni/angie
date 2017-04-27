@@ -35,6 +35,7 @@ namespace angie {
             using uintptr = uintptr_t;
 
             using size = size_t;
+            using byte = uint8_t;
 
         }
     }

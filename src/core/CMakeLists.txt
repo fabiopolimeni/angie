@@ -10,27 +10,58 @@ set(HEADER_FILES
         ${ANGIE_INCLUDE_DIR}/angie/core/config.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/defines.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/version.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/utils.hpp)
+        ${ANGIE_INCLUDE_DIR}/angie/core/utils.hpp
+        ${ANGIE_INCLUDE_DIR}/angie/core/algorithm.hpp)
 
 set(INTERFACE_FILES
+        ${ANGIE_INCLUDE_DIR}/angie/core/debug/assert.hpp
+        ${ANGIE_INCLUDE_DIR}/angie/core/debug/callstack.hpp
+        ${ANGIE_INCLUDE_DIR}/angie/core/debug/debugger.hpp
+        ${ANGIE_INCLUDE_DIR}/angie/core/debug/hardware_break.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/memory/global.hpp
+        ${ANGIE_INCLUDE_DIR}/angie/core/memory/manipulation.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/memory/allocator.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/containers/array.hpp
+        ${ANGIE_INCLUDE_DIR}/angie/core/containers/dynamic_array.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/system/system.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/system/cpu_info.hpp)
 
 set(SOURCE_FILES
         memory/global.cpp
+        memory/manipulation.cpp
+        memory/allocator.cpp
         system/system.cpp)
 
 set(IMPLEMENTATION_FILES
         memory/impl/global_impl.hpp
         system/impl/system_impl.hpp)
 
-set(SOURCE_MEMORY_FILES "")
-set(SOURCE_SYSTEM_FILES "")
+# Debug
+set(SOURCE_DEBUG_FILES "")
+if (angie_debug_tools)
+    set(DBGTOOLS_DIR ../../externals/dbgtools)
+    set(DBGTOOLS_DIR_INC ${DBGTOOLS_DIR}/include/dbgtools)
+    set(DBGTOOLS_DIR_SRC ${DBGTOOLS_DIR}/src)
+
+    target_include_directories(angie_core PRIVATE ${DBGTOOLS_DIR}/include)
+
+    set_source_files_properties(${DBGTOOLS_DIR_SRC}/assert.cpp
+            PROPERTIES
+            COMPILE_DEFINITIONS DBG_TOOLS_ASSERT_ENABLE
+            LANGUAGE CXX)
+
+    list(APPEND SOURCE_DEBUG_FILES
+            ${DBGTOOLS_DIR_INC}/assert.h
+            ${DBGTOOLS_DIR_SRC}/assert.cpp
+            ${DBGTOOLS_DIR_INC}/callstack.h
+            ${DBGTOOLS_DIR_SRC}/callstack.cpp
+            ${DBGTOOLS_DIR_INC}/debugger.h
+            ${DBGTOOLS_DIR_SRC}/debugger.cpp
+            ${DBGTOOLS_DIR_INC}/hw_breakpoint.h
+            ${DBGTOOLS_DIR_SRC}/hw_breakpoint.cpp)
+endif()
 
 # Memory
+set(SOURCE_MEMORY_FILES "")
 if (angie_memory_global_ltalloc) # ltalloc
     list(APPEND SOURCE_MEMORY_FILES
             ../../externals/ltalloc/ltalloc.cc
@@ -50,6 +81,7 @@ else() # default system alloctor
 endif()
 
 # System - plibsys
+set(SOURCE_SYSTEM_FILES "")
 if (angie_system_plibsys)
     list(APPEND SOURCE_SYSTEM_FILES
             system/impl/plibsys/system_plibsys.cpp)
@@ -77,6 +109,8 @@ target_sources(angie_core PUBLIC ${HEADER_FILES})
 target_sources(angie_core PUBLIC ${INTERFACE_FILES})
 target_sources(angie_core PRIVATE ${SOURCE_FILES})
 target_sources(angie_core PRIVATE ${IMPLEMENTATION_FILES})
+
+target_sources(angie_core PRIVATE ${SOURCE_DEBUG_FILES})
 target_sources(angie_core PRIVATE ${SOURCE_MEMORY_FILES})
 target_sources(angie_core PRIVATE ${SOURCE_SYSTEM_FILES})
 

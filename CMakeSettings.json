@@ -1,0 +1,81 @@
+{
+    // See https://go.microsoft.com//fwlink//?linkid=834763 for more information about this file.
+  "configurations": [
+    {
+      "name": "x86-Debug",
+      "generator": "Visual Studio 15 2017",
+      "configurationType": "Debug",
+      "buildRoot": "${projectDir}\\cmake\\builds\\msvc15\\${name}",
+      "cmakeCommandArgs": "-DCMAKE_BUILD_TYPE=\"Debug\"",
+      "buildCommandArgs": "-m -v:minimal",
+      "variables": [
+        {
+          "name": "angie_memory_global_ltalloc",
+          "value": "ON"
+        }
+      ]
+    },
+    {
+      "name": "x86-Profile",
+      "generator": "Visual Studio 15 2017",
+      "configurationType": "Release",
+      "buildRoot": "${projectDir}\\cmake\\builds\\msvc15\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-m -v:minimal",
+      "variables": [
+        {
+          "name": "angie_memory_global_ltalloc",
+          "value": "ON"
+        },
+        {
+          "name": "angie_config_profile",
+          "value": "ON"
+        }
+      ]
+    },
+    {
+      "name": "x86-Release",
+      "generator": "Visual Studio 15 2017",
+      "configurationType": "Release",
+      "buildRoot": "${projectDir}\\cmake\\builds\\msvc15\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-m -v:minimal",
+      "variables": [
+        {
+          "name": "angie_memory_global_ltalloc",
+          "value": "ON"
+        }
+      ]
+    },
+    {
+      "name": "x64-Debug",
+      "generator": "Visual Studio 15 2017 Win64",
+      "configurationType": "Debug",
+      "buildRoot": "${projectDir}\\cmake\\builds\\msvc15\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-m -v:minimal"
+    },
+    {
+      "name": "x64-Profile",
+      "generator": "Visual Studio 15 2017 Win64",
+      "configurationType": "Release",
+      "buildRoot": "${projectDir}\\cmake\\builds\\msvc15\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-m -v:minimal",
+      "variables": [
+        {
+          "name": "angie_config_profile",
+          "value": "ON"
+        }
+      ]
+    },
+    {
+      "name": "x64-Release",
+      "generator": "Visual Studio 15 2017 Win64",
+      "configurationType": "Release",
+      "buildRoot": "${projectDir}\\cmake\\builds\\msvc15\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-m -v:minimal"
+    }
+  ]
+}

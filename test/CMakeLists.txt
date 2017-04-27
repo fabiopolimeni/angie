@@ -19,3 +19,11 @@ target_link_libraries(angie_system_tests angie_core)
 add_test(NAME angie_system_tests COMMAND angie_system_tests)
 set_target_properties(angie_system_tests PROPERTIES FOLDER
         "angie/core/system")
+
+# Array tests
+add_executable(angie_array_tests
+        angie/core/containers/array_tests.cpp)
+target_link_libraries(angie_array_tests angie_core)
+add_test(NAME angie_array_tests COMMAND angie_array_tests)
+set_target_properties(angie_array_tests PROPERTIES FOLDER
+        "angie/core/containers")
