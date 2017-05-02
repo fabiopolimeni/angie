@@ -31,13 +31,13 @@ namespace angie {
         namespace memory {
             namespace impl {
 
-                void* allocate(types::size size, types::size align) {
+                void* allocate(types::size sz, types::size al) {
                     // Always guarantee a minimum alignment
                     // as big as the size of a pointer
-                    if (align < sizeof(types::uintptr))
-                        align = sizeof(types::uintptr);
+                    if (al < sizeof(types::uintptr))
+                        al = sizeof(types::uintptr);
 
-                    return ltmemalign(align, size);
+                    return ltmemalign(al, sz);
                 }
 
                 void deallocate(void* ptr) {
@@ -84,7 +84,7 @@ namespace angie {
                     ltsqueeze(0);
                 }
 
-                types::size sizeOf(void* ptr) {
+                types::size size_of(void* ptr) {
                     return ltmsize(ptr);
                 }
 

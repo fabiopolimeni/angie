@@ -27,8 +27,8 @@ namespace angie {
                 impl::flush();
             }
 
-            types::size sizeOf(void *ptr) {
-                return impl::sizeOf(ptr);
+            types::size size_of(void *ptr) {
+                return impl::size_of(ptr);
             }
         }
     }

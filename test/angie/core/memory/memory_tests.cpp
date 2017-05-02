@@ -28,7 +28,7 @@ TEST_CASE( "Memory allocation", "[allocation]" )
         void* buffer = memory::allocate(116, 32);
         REQUIRE(buffer != nullptr);
         REQUIRE(utils::is_multiple_of((size) buffer, 16));
-        REQUIRE(memory::sizeOf(buffer) >= 116);
+        REQUIRE(memory::size_of(buffer) >= 116);
         memory::deallocate(buffer);
     }
 
@@ -65,7 +65,7 @@ TEST_CASE( "Memory allocation", "[allocation]" )
 
         // Write some data to the buffer to verify
         // that it will be carried on correctly.
-        auto init_sz = memory::sizeOf(b);
+        auto init_sz = memory::size_of(b);
 
         static const size_t str_sz = 32;
         char init_str[str_sz] = {0};
@@ -75,7 +75,7 @@ TEST_CASE( "Memory allocation", "[allocation]" )
         void* c = memory::reallocate(b, 3*1024);
         REQUIRE(c != nullptr);
         REQUIRE(utils::is_multiple_of((size) c, 32));
-        REQUIRE(memory::sizeOf(c) >= 3*1024);
+        REQUIRE(memory::size_of(c) >= 3*1024);
         REQUIRE(strcmp((const char*)c, init_str) == 0);
 
         void* d = memory::reallocate(c, 1024, 64);

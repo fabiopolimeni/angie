@@ -18,6 +18,11 @@ namespace {
 #pragma warning(disable:4146) // negate an unsigned integer
 #endif
 
+	static inline
+	void* get_allocated_ptr(void* ptr) {
+		return ((void**)ptr)[-1];
+	}
+
     static inline
     void * alloc_aligned(size_t sz, size_t al) {
         // Alignment must be a power of two.
@@ -42,24 +47,35 @@ namespace {
 
         // Store the original malloc value where
         // it can be found by operator delete.
-        ((void **) aligned_ptr)[-1] = malloc_ptr;
+		((void **) aligned_ptr)[-1] = malloc_ptr;
 
         return aligned_ptr;
     }
 
     static inline
     void free_aligned(void* ptr) {
-        free(((void**)ptr)[-1]);
+        free(get_allocated_ptr(ptr));
     }
 
     static inline
     size_t memory_size(void* ptr) {
+		void* alloc_ptr = get_allocated_ptr(ptr);
 #if defined(ANGIE_CC_MSVC) || defined(ANGIE_CC_MINGW)
-        return _msize(((void**)ptr)[-1]);
+        return _msize(alloc_ptr);
 #else
-        return malloc_usable_size(((void**)ptr)[-1]);
+        return malloc_usable_size(alloc_ptr);
 #endif
     }
+
+	// memory_size() returns the size of the allocated block
+	// not the size available to the user, as we had to switch the pointer
+	// back at least one position to hold the returned address. Therefore,
+	// we need to take into account this difference when calculating the
+	// final available size to the user.
+	size_t get_available_memory(void* ptr) {
+		const size_t dsz = (uintptr_t)ptr - (uintptr_t)get_allocated_ptr(ptr);
+		return memory_size(ptr) - dsz;
+	}
 
     static inline
     void* realloc_aligned(void* ptr, size_t sz, size_t al) {
@@ -67,19 +83,18 @@ namespace {
         if (!ptr) return alloc_aligned(sz, al);
         if (!sz) return free_aligned(ptr), nullptr;
 
-        // If pointer and size are valid, then, check
-        // the current state of the given pointer, and,
-        // if the new size and alignment are less or equal
+        // If pointer and size are valid, then, check the current state of the
+		// given pointer, and, if the new size and alignment are less or equal
         // to the original ones, then, just return the original pointer.
-        size_t osz = memory_size(ptr);
-        size_t oal = angie::core::utils::alignment_of((uintptr_t) ptr);
+		const size_t osz = get_available_memory(ptr);
+        const size_t oal = angie::core::utils::alignment_of((uintptr_t) ptr);
         if (sz <= osz) {
             if (oal >= al) {
                 return ptr;
             }
         }
 
-        size_t nal = (oal < al) ? al : oal;
+        const size_t nal = (oal < al) ? al : oal;
         void* nptr = alloc_aligned(sz, nal);
 
         // Memory move can't cope with null pointers, as
@@ -122,7 +137,7 @@ namespace angie {
                 void flush() {
                 }
 
-                types::size sizeOf(void* ptr) {
+                types::size size_of(void* ptr) {
                     return memory_size(ptr);
                 }
 

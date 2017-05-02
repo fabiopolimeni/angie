@@ -31,7 +31,7 @@ namespace angie {
                 VMX,                /*!< Virtualization technology supported */
                 SMX,                /*!< Safer mode exceptions */
                 TM2,                /*!< Thermal monitor 2 */
-                SSSE3,              /*!< SSSE3 instructionss supported */
+                SSSE3,              /*!< SSSE3 instructions supported */
                 CID,                /*!< Context ID supported */
                 CX16,               /*!< CMPXCHG16B instruction supported */
                 DCA,                /*!< Direct cache access supported */
@@ -88,9 +88,14 @@ namespace angie {
             /**
              * This structure holds the CPU information.
              *
-             * E.g. The name of the model, the id, which identifies
-             * what CPU this refers to, in case more than one is
-             * found available on the system.
+             * @param name CPU friendly name
+			 * @param id Identifies which CPU this refers to
+			 * @param physical_cores Number of physical cores
+			 * @param logical_processors Number of logical CPUs (HT)
+			 * @param data_cache Data cache sizes per cache level
+			 * @param instruction_cache Instruction cache sizes per cache level
+			 * @param cache_line Cache line sizes per cache level
+			 * @param features CPU capable features
              */
             struct info {
                 const types::char8*     name;
@@ -110,8 +115,10 @@ namespace angie {
              * dynamic array passed in. This array doesn't need to be
              * initialised, although, feel free to do so, in case you
              * want to use an allocator different from the default one.
+			 *
              * @param cpus Array of CPUs found available on the system.
-             * @return
+             * @return true if query CPU info is supported on the current
+			 *         system, false otherwise.
              */
             types::boolean query(array::dynamic<info*>& cpus);
 

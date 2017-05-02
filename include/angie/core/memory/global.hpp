@@ -77,7 +77,7 @@ namespace angie {
              * @return The size of the allocated pointer if not null
              * @note Thread-safe.
              */
-            types::size sizeOf(void *ptr);
+            types::size size_of(void *ptr);
 
         }
     }
