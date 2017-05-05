@@ -9,6 +9,10 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON) #...is required...
 set(CMAKE_C_EXTENSIONS OFF) #...without compiler extensions like gnu11
 
+if (MSVC)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
+endif()
+
 set(BUILD_TIME "")
 string(TIMESTAMP BUILD_TIME "%Y%m%d%H%M%S")
 

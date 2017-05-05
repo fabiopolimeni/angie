@@ -156,7 +156,7 @@ namespace angie {
 				return get_state(arr) == state::ready;
 			}
 
-			/**
+            /**
 			 * Whether two arrays are considered equals or not.
 			 *
 			 * @tparam T POD type
@@ -164,15 +164,16 @@ namespace angie {
 			 * @param right Array object
 			 * @return true if the two arrays are equals, false otherwise
 			 */
-			template <typename T>
-			inline types::boolean equal(const dynamic<T>& left,
-				const dynamic<T>& right) {
-				// If a shallow compare fails, then compare memory content
-				return (memory::is_equal(&left, &right, sizeof(left))
-					|| ((left.count == right.count && left.count > 0)
-						&& memory::is_equal(left.data, right.data,
-							compute_size<T>(left.count))));
-			}
+            template <typename T, typename U>
+            inline types::boolean equal(const dynamic<T>& left,
+                                        const dynamic<U>& right) {
+                static_assert(sizeof(T) == sizeof(U));
+                // If a shallow compare fails, then compare memory content
+                return (memory::is_equal(&left, &right, sizeof(left))
+                        || ((left.count == right.count && left.count > 0)
+                            && memory::is_equal(left.data, right.data,
+                                                compute_size<T>(left.count))));
+            }
 
 			/**
 			 * Get data the given data of the array.
@@ -781,6 +782,33 @@ namespace angie {
 			}
 
 			/**
+			 * Grow the array to accommodate the given buffer.
+			 *
+			 * This function will make enough space, to accommodate and copy
+			 * the data contained in the buffer, into the array.
+			 * This can be, used to de-serialize an array from raw memory.
+			 *
+			 * @tparam T POD type
+			 * @param src Source buffer to copy from
+			 * @param n_bytes Number of bytes to write
+			 * @param dst Destination buffer
+			 * @param at Position where starting to write from
+			 * @return true if successful, false otherwise
+			 */
+			template <typename T>
+			inline types::boolean add_buffer(const void* src,
+				types::size n_bytes, dynamic<T>& dst,
+				types::uintptr at = 0) {
+				angie_assert(src, "Source buffer must be not-null");
+				
+				if (n_bytes && make_space(dst, at, compute_count<T>(n_bytes))) {
+					return !!(memory::copy(dst.data + at, src, n_bytes));
+				}
+				
+				return false;
+			}
+
+			/**
 			 * Overwrite array's data with the given memory starting from `at`.
 			 *
 			 * This function will copy memory in the buffer, into the array
@@ -824,10 +852,11 @@ namespace angie {
 			 * @param num Number of elements to copy
 			 * @return true if successful, false otherwise
 			 */
-			template <typename T>
+			template <typename T, typename U>
 			inline types::boolean copy(dynamic<T>& dst,
-				const dynamic<T>& src, types::uintptr from = 0,
+				const dynamic<U>& src, types::uintptr from = 0,
 				types::size num = SIZE_MAX) {
+                static_assert(sizeof(T) == sizeof(U));
 				angie_assert(from < src.count);
 				angie_assert(is_empty(dst));
 
@@ -860,10 +889,11 @@ namespace angie {
 			 * @param num Number of elements to copy
 			 * @return true if successful, false otherwise
 			 */
-			template <typename T>
+			template <typename T, typename U>
 			inline types::boolean insert(dynamic<T>& dst, types::uintptr at,
-				const dynamic<T>& src, types::uintptr from = 0,
+				const dynamic<U>& src, types::uintptr from = 0,
 				types::size num = SIZE_MAX) {
+				static_assert(sizeof(T) == sizeof(U));
 				angie_assert(is_valid(dst));
 				angie_assert(at < SIZE_MAX);
 				angie_assert(from < src.count);
@@ -892,9 +922,10 @@ namespace angie {
 			 * @param num Number of elements to copy
 			 * @return true if successful, false otherwise
 			 */
-			template <typename T>
-			inline types::boolean append(dynamic<T>& dst, const dynamic<T>& src,
+			template <typename T, typename U>
+			inline types::boolean append(dynamic<T>& dst, const dynamic<U>& src,
 				types::uintptr from = 0, types::size num = SIZE_MAX) {
+				static_assert(sizeof(T) == sizeof(U));
 				angie_assert(is_valid(dst));
 				angie_assert(from < src.count);
 

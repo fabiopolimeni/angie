@@ -256,7 +256,7 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		array::dynamic<types::char8> str_a = { 0 };
 		str_a.ator = memory::get_default_allocator();
 
-		const array::dynamic<types::char8> phrase_a = {
+		const array::dynamic<const types::char8> phrase_a = {
 			"Lore Ipsum est", 14, 16, nullptr
 		};
 
@@ -274,7 +274,7 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		array::dynamic<types::char8> str_a = { 0 };
 		str_a.ator = memory::get_default_allocator();
 
-		const array::dynamic<types::char8> phrase_a = {
+		const array::dynamic<const types::char8> phrase_a = {
 			"Lore Ipsum est", 14, 16, nullptr
 		};
 
@@ -286,11 +286,11 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		array::dynamic<types::char8> str_a = { 0 };
 		str_a.ator = memory::get_default_allocator();
 
-		const array::dynamic<types::char8> name_a = {
+		const array::dynamic<const types::char8> name_a = {
 			"Fabio", 5, 0, nullptr
 		};
 
-		const array::dynamic<types::char8> surname_a = {
+		const array::dynamic<const types::char8> surname_a = {
 			"Polimeni", 8, 0, nullptr
 		};
 
@@ -310,7 +310,7 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		array::dynamic<types::char8> str_a = { 0 };
 		str_a.ator = memory::get_default_allocator();
 
-		const array::dynamic<types::char8> phrase_a = {
+		const array::dynamic<const types::char8> phrase_a = {
 			"Lore Ipsum est", 14, 16, nullptr
 		};
 
@@ -333,9 +333,9 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 	}
 
 	SECTION("Push/Pop elements") {
-		const array::dynamic<types::char8> phrase_a = {
-			"Lore", 4, 8, nullptr
-		};
+		array::dynamic<types::char8> phrase_a = { 0 };
+		REQUIRE(array::init(phrase_a, 4));
+		REQUIRE(array::add_buffer("Lore", 4, phrase_a));
 
 		auto* str_a = array::make_copy(phrase_a);
 		
