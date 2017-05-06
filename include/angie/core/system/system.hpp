@@ -15,39 +15,69 @@ namespace angie {
             enum class error
             {
                 ok,
-                generic_system_error,
+                unknown_system_error,
                 memory_manager_error
             };
 
             namespace report
             {
-                enum class level
-                {
+                enum class level : types::uint8
+				{
+					debug,
                     info,
-                    debug,
                     performance,
                     warning,
                     error,
                     fatal
                 };
  
-                using callback = void (level lvl,
-                                       const types::char8* msg);
+                using callback = void (level lvl, const types::char8* msg);
+
+				struct settings {
+					callback*		call_back;
+					level			min_level;
+					types::boolean	exit_on_error;
+					types::boolean	abort_on_fatal;
+					types::boolean	callstack_at_exit;
+				};
+
+				/*
+				 * Initialise the report manager.
+				 * 
+				 * @param sets report settings
+				 * @return true if successful, false otherwise.
+				 */
+				types::boolean init(const settings& sets);
+
+				/**
+				 * Return the system report callback.
+				 */
+				report::callback* get_callback();
+
+				/*
+				 * Access report settings.
+				 */
+				report::settings& get_settings();
+
+				/*
+				 * Issue a report.
+				 */
+				void issue(level lvl, const types::char8* msg);
             }
             
             /**
-             * Initializes the whole system.
+             * Initialize the whole system.
              *
              * @param cb Report callback function.
-             * @return error_e::ok if no error any of the error_e otherwise.
-             * @see error_e
+             * @return error::ok if no error occurred, any of other otherwise.
+             * @see error
              * @see report::callback()
              * @since 0.0.1
              */
             error init(report::callback* cb);
 
             /**
-             * Properly shuts down the system.
+             * Properly shuts the system down.
              *
              * @since 0.0.1
              */

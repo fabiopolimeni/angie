@@ -9,13 +9,61 @@
 
 #include "angie/core/system/system.hpp"
 
+#include <cstdio>
+
+void report_callback(angie::core::system::report::level lvl,
+	const angie::core::types::char8* msg) {
+	using namespace angie::core;
+
+	switch (lvl) {
+	case system::report::level::info:
+		printf("INFO: %s\n", msg);
+		break;
+
+	case system::report::level::debug:
+		printf("DEBUG: %s\n", msg);
+		break;
+
+	case system::report::level::performance:
+		printf("PERF: %s\n", msg);
+		break;
+
+	case system::report::level::warning:
+		printf("WARN: %s\n", msg);
+		break;
+
+	case system::report::level::error:
+		printf("ERROR: %s\n", msg);
+		exit(EXIT_FAILURE);
+		break;
+
+	case system::report::level::fatal:
+		printf("FATAL: %s\n", msg);
+		abort();
+		break;
+	}
+}
+
 TEST_CASE( "System tests", "[system]" )
 {
     using namespace angie::core;
+	using namespace angie::core::system;
 
     SECTION("System initialisation") {
-        REQUIRE(system::init(nullptr) == system::error::ok);
+        REQUIRE(system::init(report_callback) == system::error::ok);
     }
+
+	SECTION("Report") {
+		report::settings sets = {
+			report_callback,		// report callback
+			report::level::debug,	// minimum report level
+			false,					// exit on error
+			true,					// abort on fatal
+			true					// callstack on exit
+		};
+
+		REQUIRE(report::init(sets));
+	}
 
     SECTION("System shutdown") {
         system::shutdown();

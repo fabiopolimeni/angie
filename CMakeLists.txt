@@ -42,9 +42,9 @@ include_directories(include)
 include_directories(externals)
 
 # Debug tools
-# Normally you want debug programmatic tools only on debug,
-# although, you can switch to any build type you like,
-# or combine them E.g. "Debug|Profile"
+# Normally you want diagnostic programmatic tools only for debug configuration,
+# although, you can switch to any build type you like, or combine them.
+# E.g. "Debug|Profile"
 message(STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE})
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
     set(angie_debug_tools ON)

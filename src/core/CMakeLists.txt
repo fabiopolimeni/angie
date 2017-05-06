@@ -14,10 +14,10 @@ set(HEADER_FILES
         ${ANGIE_INCLUDE_DIR}/angie/core/algorithm.hpp)
 
 set(INTERFACE_FILES
-        ${ANGIE_INCLUDE_DIR}/angie/core/debug/assert.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/debug/callstack.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/debug/debugger.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/debug/hardware_break.hpp
+        ${ANGIE_INCLUDE_DIR}/angie/core/diagnostics/assert.hpp
+        ${ANGIE_INCLUDE_DIR}/angie/core/diagnostics/callstack.hpp
+        ${ANGIE_INCLUDE_DIR}/angie/core/diagnostics/debugger.hpp
+        ${ANGIE_INCLUDE_DIR}/angie/core/diagnostics/hardware_break.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/memory/global.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/memory/manipulation.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/memory/allocator.hpp
@@ -44,6 +44,17 @@ if (angie_debug_tools)
 
     target_include_directories(angie_core PRIVATE ${DBGTOOLS_DIR}/include)
 
+	# callstack symbol
+	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+		set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -rdynamic")
+	elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	# using GCC
+	elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+	# using Intel C++
+	elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+		target_link_libraries(angie_core Dbghelp.lib)
+	endif()
+
     set_source_files_properties(${DBGTOOLS_DIR_SRC}/assert.cpp
             PROPERTIES
             COMPILE_DEFINITIONS DBG_TOOLS_ASSERT_ENABLE
@@ -58,6 +69,9 @@ if (angie_debug_tools)
             ${DBGTOOLS_DIR_SRC}/debugger.cpp
             ${DBGTOOLS_DIR_INC}/hw_breakpoint.h
             ${DBGTOOLS_DIR_SRC}/hw_breakpoint.cpp)
+
+	list(APPEND SOURCE_DEBUG_FILES
+            diagnostics/callstack.cpp)
 endif()
 
 # Memory
@@ -85,8 +99,6 @@ set(SOURCE_SYSTEM_FILES "")
 if (angie_system_plibsys)
     list(APPEND SOURCE_SYSTEM_FILES
             system/impl/plibsys/system_plibsys.cpp)
-
-    target_sources(angie_core PRIVATE ${SOURCE_SYSTEM_FILES})
 
     set(PLIBSYS_DIR ../../externals/plibsys)
     option(PLIBSYS_TESTS "" OFF)
