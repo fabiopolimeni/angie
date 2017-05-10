@@ -26,6 +26,7 @@ option(angie_config_profile "Use profile configuration" OFF)
 option(angie_memory_global_ltalloc "Use ltalloc for global memory" OFF)
 option(angie_system_plibsys "Use plibsys as base system library" ON)
 option(angie_debug_tools "Use programmatic debug tools" OFF)
+option(angie_cpu_libcpuid "Use libcpuid to detect cpu info" ON)
 
 # Profile configuration
 if (angie_config_profile)
@@ -51,6 +52,47 @@ if (CMAKE_BUILD_TYPE MATCHES "Debug")
     include_directories(externals/dbgtools/include)
     add_definitions(-D_DEBUG_TOOLS)
 endif()
+
+function (angie_detect_os_arch result)
+        if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+                set (ANGIE_OS_ARCH 64)
+        else()
+                set (ANGIE_OS_ARCH 32)
+        endif()
+
+        set (${result} ${ANGIE_OS_ARCH} PARENT_SCOPE)
+endfunction (angie_detect_os_arch)
+
+function (angie_detect_cpu_arch result)
+        if (CMAKE_SYSTEM_PROCESSOR MATCHES "(i[1-9]86)|(x86_64)")
+                if (CMAKE_CROSSCOMPILING)
+                        if (CMAKE_SYSTEM_PROCESSOR MATCHES "i[1-9]86")
+                                set (ANGIE_CPU_ARCH "x86")
+                        else()
+                                set (ANGIE_CPU_ARCH "x64")
+                        endif()
+                else()
+                        angie_detect_os_arch(ANGIE_OS_BITS)
+                        if (ANGIE_OS_BITS STREQUAL "32")
+                                set (ANGIE_CPU_ARCH "x86")
+                        else()
+                                set (ANGIE_CPU_ARCH "x64")
+                        endif()
+                endif()
+        else()
+                set (ANGIE_CPU_ARCH ${CMAKE_SYSTEM_PROCESSOR})
+        endif()
+
+        set (${result} ${ANGIE_CPU_ARCH} PARENT_SCOPE)
+endfunction (angie_detect_cpu_arch)
+
+# OS bits possible values 32|64
+set(ANGIE_OS_BITS "")
+angie_detect_os_arch(ANGIE_OS_BITS)
+
+# CPU architecture possible values x86|x64|ARM|ARM64
+set(ANGIE_CPU_ARCH "")
+angie_detect_cpu_arch(ANGIE_CPU_ARCH)
 
 # Add lib core directory
 add_subdirectory(src/core)

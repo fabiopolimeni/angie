@@ -23,17 +23,19 @@ set(INTERFACE_FILES
         ${ANGIE_INCLUDE_DIR}/angie/core/memory/allocator.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/containers/dynamic_array.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/system/system.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/system/cpu_info.hpp)
+        ${ANGIE_INCLUDE_DIR}/angie/core/system/cpu.hpp)
 
 set(SOURCE_FILES
         memory/global.cpp
         memory/manipulation.cpp
         memory/allocator.cpp
-        system/system.cpp)
+        system/system.cpp
+		system/cpu.cpp)
 
 set(IMPLEMENTATION_FILES
         memory/impl/global_impl.hpp
-        system/impl/system_impl.hpp)
+        system/impl/system_impl.hpp
+		system/impl/cpu_impl.hpp)
 
 # Debug
 set(SOURCE_DEBUG_FILES "")
@@ -116,6 +118,17 @@ if (angie_system_plibsys)
     message(STATUS "System: plibsys")
 endif()
 
+# CPU - 
+set(SOURCE_CPU_FILES "")
+if (angie_cpu_libcpuid)
+	list(APPEND SOURCE_CPU_FILES system/impl/libcpuid/cpu_libcpuid.cpp)
+
+    set(LIBCPUID_DIR ../../externals/libcpuid)
+	include_directories(${LIBCPUID_DIR}/libcpuid ${CMAKE_BINARY_DIR})
+	message(STATUS "CPU: libcpuid")
+endif()
+
+
 # Add source files
 target_sources(angie_core PUBLIC ${HEADER_FILES})
 target_sources(angie_core PUBLIC ${INTERFACE_FILES})
@@ -125,6 +138,7 @@ target_sources(angie_core PRIVATE ${IMPLEMENTATION_FILES})
 target_sources(angie_core PRIVATE ${SOURCE_DEBUG_FILES})
 target_sources(angie_core PRIVATE ${SOURCE_MEMORY_FILES})
 target_sources(angie_core PRIVATE ${SOURCE_SYSTEM_FILES})
+target_sources(angie_core PRIVATE ${SOURCE_CPU_FILES})
 
 set_target_properties(angie_core PROPERTIES FOLDER "angie/core")
 install(TARGETS angie_core DESTINATION lib)
