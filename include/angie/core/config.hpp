@@ -10,13 +10,13 @@
  * Configuration settings.
  *
  * DEBUG: Project built with debug information
- * RELEASE: Project built with optimisations
+ * RELEASE: Project built with optimisation
  * PROFILE: Like RELEASE but with profile information available
  */
 #ifdef _DEBUG
 #define ANGIE_DEBUG
 #elif defined(_PROFILE)
-#define AGNIE_PROFILE
+#define ANGIE_PROFILE
 #else
 #define ANGIE_RELEASE
 #endif

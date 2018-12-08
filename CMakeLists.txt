@@ -52,4 +52,5 @@ endif()
 add_subdirectory(src/core)
 
 # Add testing files
+include(CTest)
 add_subdirectory(test)

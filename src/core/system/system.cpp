@@ -11,7 +11,14 @@ namespace angie {
     namespace core {
         namespace system {
 
+            report::callback* g_report_callback = nullptr;
+
+            report::callback* get_report_callback() {
+                return g_report_callback;
+            }
+
             error init(report::callback *cb) {
+                g_report_callback = cb;
                 return impl::init(cb);
             }
 

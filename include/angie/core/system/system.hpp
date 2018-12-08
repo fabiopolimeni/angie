@@ -31,9 +31,13 @@ namespace angie {
                     fatal
                 };
  
-                using callback = void (level lvl,
-                                       const types::char8* msg);
+                using callback = void (level lvl, const types::char8* msg);
             }
+
+            /**
+             * Return the system callback passed at initialisation.
+             */
+            report::callback* get_report_callback();
             
             /**
              * Initializes the whole system.

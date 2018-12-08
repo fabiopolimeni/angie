@@ -15,9 +15,9 @@ set(HEADER_FILES
 
 set(INTERFACE_FILES
         ${ANGIE_INCLUDE_DIR}/angie/core/debug/assert.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/debug/callstack.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/debug/debugger.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/debug/hardware_break.hpp
+        #${ANGIE_INCLUDE_DIR}/angie/core/debug/callstack.hpp
+        #${ANGIE_INCLUDE_DIR}/angie/core/debug/debugger.hpp
+        #${ANGIE_INCLUDE_DIR}/angie/core/debug/hardware_break.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/memory/global.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/memory/manipulation.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/memory/allocator.hpp

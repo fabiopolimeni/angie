@@ -8,7 +8,7 @@ endif()
 add_executable(angie_memory_tests
         angie/core/memory/memory_tests.cpp)
 target_link_libraries(angie_memory_tests angie_core)
-add_test(NAME angie_memory_test COMMAND angie_memory_test)
+add_test(NAME angie_memory_tests COMMAND angie_memory_tests)
 set_target_properties(angie_memory_tests PROPERTIES FOLDER
         "angie/core/memory")
 

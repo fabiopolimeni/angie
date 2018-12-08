@@ -174,6 +174,24 @@ namespace angie {
 							compute_size<T>(left.count))));
 			}
 
+			template <typename T>
+			inline types::boolean equal(const dynamic<const T>& left,
+				const dynamic<T>& right) {
+				return (memory::is_equal(&left, &right, sizeof(left))
+					|| ((left.count == right.count && left.count > 0)
+						&& memory::is_equal(left.data, right.data,
+							compute_size<const T>(left.count))));
+			}
+
+			template <typename T>
+			inline types::boolean equal(const dynamic<T>& left,
+				const dynamic<const T>& right) {
+				return (memory::is_equal(&left, &right, sizeof(left))
+					|| ((left.count == right.count && left.count > 0)
+						&& memory::is_equal(left.data, right.data,
+							compute_size<T>(left.count))));
+			}
+
 			/**
 			 * Get data the given data of the array.
 			 *
@@ -228,10 +246,9 @@ namespace angie {
 			/**
 			 * Whether or not the given array empty.
 			 *
-			 * This function does also check whether the array passed as param
-			 * is valid, and if not, the empty flag will not be updated.
-			 * Does not check memory data to determine whether the array is
-			 * empty, but the count property only, therefore, data can be null.
+			 * This function does not check memory data to determine if the array
+			 * is empty. It will only look at the `count` property only, therefore,
+			 * the data pointer can be null.
 			 * By design this function does not check whether the array passed
 			 * is valid, it is responsibility of the user to do so if relevant.
 			 *
@@ -403,11 +420,10 @@ namespace angie {
 			/**
 			 * Initialise the given object array.
 			 *
-			 * Because we receive a reference, it might
-			 * happen that the array was full, and this
-			 * function would behave as re-init(), if this
-			 * is the case, we need to empty the content before
-			 * reserve the memory to accommodate `num` elements.
+			 * Because we receive a reference, it may happen that
+			 * the array is not empty. In such case this function
+			 * will behave as re-init(). The content will be emptied
+			 * before reserveing new memory to accommodate `num` elements.
 			 *
 			 * @tparam T POD type
 			 * @param dst Object array to initialise
@@ -783,7 +799,7 @@ namespace angie {
 			/**
 			 * Overwrite array's data with the given memory starting from `at`.
 			 *
-			 * This function will copy memory in the buffer, into the array
+			 * This function will copy memory from the buffer, into the array.
 			 * It will not make space if the buffer size is greater than the
 			 * current array size. This function can be, used to de-serialize
 			 * an array from a raw blob of memory, if the array is capable of
