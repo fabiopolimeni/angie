@@ -21,6 +21,7 @@ set(INTERFACE_FILES
         ${ANGIE_INCLUDE_DIR}/angie/core/memory/global.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/memory/manipulation.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/memory/allocator.hpp
+        ${ANGIE_INCLUDE_DIR}/angie/core/containers/common.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/containers/dynamic_array.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/system/system.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/system/cpu_info.hpp)
@@ -67,10 +68,13 @@ if (angie_memory_global_ltalloc) # ltalloc
             ../../externals/ltalloc/ltalloc.cc
             memory/impl/ltalloc/global_ltalloc.cpp)
 
-    set_source_files_properties(../../externals/ltalloc/ltalloc.cc
-            PROPERTIES
-            COMPILE_DEFINITIONS LTALLOC_DISABLE_OPERATOR_NEW_OVERRIDE
-            LANGUAGE C)
+    # set_source_files_properties(../../externals/ltalloc/ltalloc.cc
+    #         PROPERTIES
+    #         COMPILE_DEFINITIONS LTALLOC_DISABLE_OPERATOR_NEW_OVERRIDE
+	# 		LANGUAGE CXX)
+			
+	target_compile_definitions(angie_core PRIVATE LTALLOC_DISABLE_OPERATOR_NEW_OVERRIDE)
+	target_compile_definitions(angie_core PRIVATE LTALLOC_DISABLE_EXCEPTIONS)
 
     message(STATUS "Memory manager: ltalloc")
 else() # default system alloctor
