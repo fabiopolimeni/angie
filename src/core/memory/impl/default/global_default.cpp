@@ -18,12 +18,12 @@ namespace {
 #pragma warning(disable:4146) // negate an unsigned integer
 #endif
 
-	static inline
+	inline
 	void* get_allocated_ptr(void* ptr) {
 		return ((void**)ptr)[-1];
 	}
 
-    static inline
+    inline
     void * alloc_aligned(size_t sz, size_t al) {
         // Alignment must be a power of two.
         if (al & (al - 1))
@@ -52,12 +52,12 @@ namespace {
         return aligned_ptr;
     }
 
-    static inline
+    inline
     void free_aligned(void* ptr) {
         free(get_allocated_ptr(ptr));
     }
 
-    static inline
+    inline
     size_t memory_size(void* ptr) {
 		void* alloc_ptr = get_allocated_ptr(ptr);
 #if defined(ANGIE_CC_MSVC) || defined(ANGIE_CC_MINGW)
@@ -72,12 +72,13 @@ namespace {
 	// back at least one position to hold the returned address. Therefore,
 	// we need to take into account this difference when calculating the
 	// final available size to the user.
+    inline
 	size_t get_available_memory(void* ptr) {
 		const size_t dsz = (uintptr_t)ptr - (uintptr_t)get_allocated_ptr(ptr);
 		return memory_size(ptr) - dsz;
 	}
 
-    static inline
+    inline
     void* realloc_aligned(void* ptr, size_t sz, size_t al) {
         // Handle special cases
         if (!ptr) return alloc_aligned(sz, al);
@@ -104,7 +105,7 @@ namespace {
         // eventual memory allocation failure, and return
         // a null pointer.
         if (nptr) {
-			size_t nsz = osz > sz ? sz : osz;
+			const size_t nsz = osz > sz ? sz : osz;
             if (!memmove(nptr, ptr, nsz)) {
                 free_aligned(nptr);
             }

@@ -13,22 +13,6 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 {
 	using namespace angie::core;
 
-	SECTION("Create array on the heap") {
-		auto* u16_array_ptr = containers::make_dynamic_array<types::uint16>(6);
-		REQUIRE(u16_array_ptr);
-		REQUIRE(u16_array_ptr->data);
-		REQUIRE(u16_array_ptr->count == 0);
-		REQUIRE(u16_array_ptr->capacity >= 6);
-
-		containers::destroy(u16_array_ptr);
-	}
-
-	SECTION("Destory allocated array") {
-		auto* u16_array_ptr = containers::make_dynamic_array<types::uint16>(6);
-		containers::destroy(u16_array_ptr);
-		REQUIRE(u16_array_ptr == nullptr);
-	}
-
 	SECTION("Init/Release array") {
 		containers::dynamic_array<types::uint32> u32_array = { 0 };
 
@@ -52,7 +36,7 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		containers::reserve(u32_array, 4);
 		REQUIRE(containers::get_state(u32_array) == containers::state::ready);
 		REQUIRE(containers::is_empty(u32_array));
-		REQUIRE(u32_array.capacity > 0);
+		REQUIRE(containers::get_capacity(u32_array) > 0);
 
 		types::size more_elements = 13;
 		containers::reserve(u32_array, more_elements);
@@ -63,25 +47,27 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 	}
 
 	SECTION("Resize array") {
-		auto* i16_a = containers::make_dynamic_array<types::int16>();
-		REQUIRE(containers::is_valid(*i16_a));
-		REQUIRE(containers::is_empty(*i16_a));
-		REQUIRE(containers::resize(*i16_a, 3));
-		REQUIRE(containers::is_empty(*i16_a) == false);
-		REQUIRE(i16_a->count == 3);
-		REQUIRE(i16_a->capacity == 4);
-		REQUIRE(containers::reserve(*i16_a, 2));
-		REQUIRE(i16_a->capacity == 8);
-		REQUIRE(i16_a->count == 3);
-		REQUIRE(containers::resize(*i16_a, 7));
-		REQUIRE(i16_a->capacity == 8);
-		REQUIRE(i16_a->count == 7);
-		REQUIRE(containers::is_full(*i16_a) == false);
-		REQUIRE(containers::resize(*i16_a, 0));
-		REQUIRE(containers::is_valid(*i16_a));
-		REQUIRE(containers::is_empty(*i16_a));
+		containers::dynamic_array<types::int16> i16_a = { 0 };
+		
+		REQUIRE(containers::init(i16_a));
+		REQUIRE(containers::is_valid(i16_a));
+		REQUIRE(containers::is_empty(i16_a));
+		REQUIRE(containers::resize(i16_a, 3));
+		REQUIRE(containers::is_empty(i16_a) == false);
+		REQUIRE(i16_a.count == 3);
+		REQUIRE(i16_a.capacity == 4);
+		REQUIRE(containers::reserve(i16_a, 2));
+		REQUIRE(i16_a.capacity == 8);
+		REQUIRE(i16_a.count == 3);
+		REQUIRE(containers::resize(i16_a, 7));
+		REQUIRE(i16_a.capacity == 8);
+		REQUIRE(i16_a.count == 7);
+		REQUIRE(containers::is_full(i16_a) == false);
+		REQUIRE(containers::resize(i16_a, 0));
+		REQUIRE(containers::is_valid(i16_a));
+		REQUIRE(containers::is_empty(i16_a));
 
-		containers::destroy(i16_a);
+		containers::release(i16_a);
 	}
 
 	SECTION("Clear array") {
@@ -256,8 +242,8 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		containers::dynamic_array<types::char8> str_a = { 0 };
 		str_a.allocator = memory::get_default_allocator();
 
-		const containers::dynamic_array<types::char8> phrase_a = {
-			"Lore Ipsum est", 14, 16, nullptr
+		const containers::dynamic_array<const types::char8> phrase_a = {
+			"Lore Ipsum est", 14, 0, nullptr
 		};
 
 		REQUIRE(containers::resize(str_a, 14));
@@ -274,8 +260,8 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		containers::dynamic_array<types::char8> str_a = { 0 };
 		str_a.allocator = memory::get_default_allocator();
 
-		const containers::dynamic_array<types::char8> phrase_a = {
-			"Lore Ipsum est", 14, 16, nullptr
+		const containers::dynamic_array<const types::char8> phrase_a = {
+			"Lore Ipsum est", 14, 0, nullptr
 		};
 
 		REQUIRE(containers::copy(str_a, phrase_a));
@@ -286,11 +272,11 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		containers::dynamic_array<types::char8> str_a = { 0 };
 		str_a.allocator = memory::get_default_allocator();
 
-		const containers::dynamic_array<types::char8> name_a = {
+		const containers::dynamic_array<const types::char8> name_a = {
 			"Fabio", 5, 0, nullptr
 		};
 
-		const containers::dynamic_array<types::char8> surname_a = {
+		const containers::dynamic_array<const types::char8> surname_a = {
 			"Polimeni", 8, 0, nullptr
 		};
 
@@ -310,8 +296,8 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		containers::dynamic_array<types::char8> str_a = { 0 };
 		str_a.allocator = memory::get_default_allocator();
 
-		const containers::dynamic_array<types::char8> phrase_a = {
-			"Lore Ipsum est", 14, 16, nullptr
+		const containers::dynamic_array<const types::char8> phrase_a = {
+			"Lore Ipsum est", 14, 0, nullptr
 		};
 
 		REQUIRE(containers::append(str_a, phrase_a));
@@ -333,34 +319,36 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 	}
 
 	SECTION("Push/Pop elements") {
-		const containers::dynamic_array<types::char8> phrase_a = {
-			"Lore", 4, 8, nullptr
+		const containers::dynamic_array<const types::char8> phrase_a = {
+			"Lore", 4, 0, nullptr
 		};
 
-		auto* str_a = containers::make_copy(phrase_a);
+		containers::dynamic_array<types::char8> str_a = { 0 };
+		containers::init(str_a);
+		containers::copy(str_a, phrase_a);
 		
-		REQUIRE(containers::push(*str_a, ' '));
-		REQUIRE(containers::push(*str_a, 'I'));
-		REQUIRE(containers::push(*str_a, 'p'));
-		REQUIRE(containers::push(*str_a, 's'));
-		REQUIRE(containers::push(*str_a, 'u'));
-		REQUIRE(containers::push(*str_a, 'm'));
-		REQUIRE(memory::is_equal(str_a->data, "Lore Ipsum", str_a->count));
-		REQUIRE(containers::get_count(*str_a) == 10);
-		REQUIRE(containers::get_capacity(*str_a) == 16);
+		REQUIRE(containers::push(str_a, ' '));
+		REQUIRE(containers::push(str_a, 'I'));
+		REQUIRE(containers::push(str_a, 'p'));
+		REQUIRE(containers::push(str_a, 's'));
+		REQUIRE(containers::push(str_a, 'u'));
+		REQUIRE(containers::push(str_a, 'm'));
+		REQUIRE(memory::is_equal(str_a.data, "Lore Ipsum", str_a.count));
+		REQUIRE(containers::get_count(str_a) == 10);
+		REQUIRE(containers::get_capacity(str_a) == 16);
 		
-		auto count = containers::get_count(*str_a);
+		auto count = containers::get_count(str_a);
 		for (auto i = 0u; i < count; ++i) {
-			types::char8 c;
-			REQUIRE(containers::pop(*str_a, c));
+			types::char8 c = '\0';
+			REQUIRE(containers::pop(str_a, c));
 		}
 
-		REQUIRE(containers::is_empty(*str_a));
+		REQUIRE(containers::is_empty(str_a));
 
 		types::char8 e = 'r';
-		REQUIRE(containers::pop(*str_a, e) == false);
+		REQUIRE(containers::pop(str_a, e) == false);
 		REQUIRE(e == 'r');
 
-		containers::destroy(str_a);
+		containers::release(str_a);
 	}
 }

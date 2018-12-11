@@ -67,7 +67,7 @@ namespace angie {
 			 * @return The alignment of the given type
 			 */
 			template <typename T>
-			constexpr inline types::size get_align() {
+			constexpr inline types::size get_type_alignment() {
 				return sizeof(T);
 			}
 
@@ -76,9 +76,11 @@ namespace angie {
 			 *
 			 * Functions operating on this structure, assume T is a POD type.
 			 * It is responsibility of the user to guarantee that the given
-			 * object passed to the functions, is in a `ready` state.
-			 * The allocator is not part of the object type, otherwise,
-			 * this would limit the usage, while we want to leave the user
+			 * dynamic_array object passed to the hereafter functions defined,
+			 * is in a `ready` state.
+			 *
+			 * The allocator is not part of the object type, because it would
+			 * have limited its usage, while we want to leave the user
 			 * to decide which one is the most appropriate at any given time.
 			 * If the allocator is null, then we assume we can't manipulate the
 			 * array as memory cannot be requested or release internally, but
@@ -105,20 +107,24 @@ namespace angie {
 			 */
 			template <typename T>
 			inline state get_state(const dynamic_array<T>& arr) {
+				// if (arr.allocator == nullptr) {
+				// 	return state::invalid_allocator;
+				// }
+
 				if (arr.data) {
 					// If data is not null, then count must be less or equal to
 					// capacity, and the capacity cannot be zero. Finally memory
 					// must be aligned to sizeof(T) and capacity power of two.
-					return (arr.capacity && arr.count <= arr.capacity &&
+					return (get_capacity(arr) && arr.count <= get_capacity(arr) &&
 						utils::is_multiple_of((types::uintptr)arr.data,
-							get_align<T>()))
+							get_type_alignment<T>()))
 						? state::ready
 						: state::inconsistent_properties;
 				}
 				else {
 					// If data is null, then count
 					// and capacity must also be zero.
-					return (!arr.count && !arr.capacity)
+					return (!arr.count && !get_capacity(arr))
 						? state::ready
 						: state::inconsistent_properties;
 				}
@@ -140,7 +146,7 @@ namespace angie {
 			}
 
 			/**
-			 * Whether two arrays are considered equals or not.
+			 * Whether two arrays are considered equal or not.
 			 *
 			 * @tparam T POD type
 			 * @param left Array object
@@ -157,6 +163,14 @@ namespace angie {
 							compute_size<T>(left.count))));
 			}
 
+			/**
+			 * Whether two arrays are considered equal or not.
+			 *
+			 * @tparam T POD type
+			 * @param left Array object
+			 * @param right Array object
+			 * @return true if the two arrays are equals, false otherwise
+			 */
 			template <typename T>
 			inline types::boolean equal(const dynamic_array<const T>& left,
 				const dynamic_array<T>& right) {
@@ -166,6 +180,14 @@ namespace angie {
 							compute_size<const T>(left.count))));
 			}
 
+			/**
+			 * Whether two arrays are considered equal or not.
+			 *
+			 * @tparam T POD type
+			 * @param left Array object
+			 * @param right Array object
+			 * @return true if the two arrays are equals, false otherwise
+			 */
 			template <typename T>
 			inline types::boolean equal(const dynamic_array<T>& left,
 				const dynamic_array<const T>& right) {
@@ -258,7 +280,7 @@ namespace angie {
 			 */
 			template <typename T>
 			inline types::boolean is_full(const dynamic_array<T>& arr) {
-				return (arr.count > 0 && arr.count == arr.capacity);
+				return (arr.count > 0 && arr.count == get_capacity(arr));
 			}
 
 			/**
@@ -276,7 +298,7 @@ namespace angie {
 			inline types::boolean is_managed(const dynamic_array<T>& arr) {
 				return (arr.allocator != nullptr);
 			}
-
+			
 			/**
 			 * Release memory and zero array's properties.
 			 *
@@ -291,77 +313,8 @@ namespace angie {
 					arr.data = nullptr;
 				}
 
-				arr.capacity = 0;
 				arr.count = 0;
-			}
-
-			/**
-			 * Instantiate a new array object.
-			 *
-			 * This function will allocate memory according to the `initial_elems`
-			 * parameter, which will be ceil-ed to the next power of two value.
-			 *
-			 * @tparam T POD type
-			 * @param initial_elems Initial number of elements to initial_elems memory for
-			 * @param allocator Allocator used to instantiate the array structure
-			 * and the buffer data
-			 * @return Not null object on success, nullptr otherwise
-			 */
-			template <typename T>
-			inline dynamic_array<T>* make_dynamic_array(types::size initial_elems = 0,
-				const memory::allocator* alloc_to_use =
-					memory::get_default_allocator()) {
-
-				T* data = nullptr;
-				types::size capacity = 0;
-
-				if (initial_elems) {
-					capacity = compute_capacity(initial_elems);
-					data = static_cast<T*>(alloc_to_use->alloc(
-						compute_size<T>(capacity), get_align<T>()));
-				}
-
-				auto array_memory = alloc_to_use->alloc(sizeof(dynamic_array<T>),
-					sizeof(dynamic_array<T>));
-
-				// Memory allocation can fail
-				if (!array_memory) {
-					return nullptr;
-				}
-
-				return new(array_memory) dynamic_array<T> {
-					data, 0, capacity, alloc_to_use
-				};
-			}
-
-			/**
-			 * Empty and destroy the given array.
-			 *
-			 * The object itself will be freed by the same allocator,
-			 * as it assumes, it has been allocated by `make_dynamic_array()`.
-			 * If this is not the case, then, simply use `release()`
-			 * to release the data while keeping a valid allocator.
-			 *
-			 * @tparam T POD type
-			 * @param arr array object to destroy
-			 */
-			template <typename T>
-			inline void destroy(dynamic_array<T>*& arr) {
-				if (arr) {
-					angie_assert(is_valid(*arr));
-					auto* allocator = arr->allocator;
-
-					// release() does not overwrite the allocator,
-					// it only releases the memory hold by `data`.
-					release(*arr);
-					arr->allocator = nullptr;
-
-					if (allocator) {
-						allocator->free(arr);
-					}
-
-					arr = nullptr;
-				}
+				arr.capacity = 0;
 			}
 
 			/**
@@ -386,11 +339,11 @@ namespace angie {
 
 					auto new_data = static_cast<T*>(dst.allocator->realloc(
 						dst.data, compute_size<T>(new_capacity),
-						get_align<T>()));
+						get_type_alignment<T>()));
 
 					if (new_data) {
-						dst.capacity = new_capacity;
 						dst.data = new_data;
+						dst.capacity = new_capacity;
 					}
 
 					// Allocation might fail
@@ -417,17 +370,12 @@ namespace angie {
 			 */
 			template <typename T>
 			inline types::boolean init(dynamic_array<T>& dst, types::size num = 0,
-				const memory::allocator* alloc_to_use =
-					memory::get_default_allocator()) {
-				angie_assert(is_valid(dst));
+				const memory::allocator* alloc_to_use = memory::get_default_allocator()) {
 				if (!is_empty(dst)) {
 					release(dst);
 				}
 
-				if (dst.allocator == nullptr) {
-					dst.allocator = alloc_to_use;
-				}
-
+				dst.allocator = alloc_to_use;
 				return reserve(dst, num);
 			}
 
@@ -451,28 +399,24 @@ namespace angie {
 				types::uint8 value = 0) {
 				angie_assert(is_valid(dst));
 				if (num > 0) {
-					auto n_to_clear = algorithm::clamp<types::size>(
-						num, 1, dst.count);
+					auto n_to_clear = algorithm::clamp<types::size>(num, 1, dst.count);
 
 					auto start = dst.count - n_to_clear;
-					angie_assert(dst.data,
-						"Non empty arrays must have valid `data`");
+					angie_assert(dst.data, "Non empty arrays must have valid `data`");
 
-					memory::set(dst.data + start, value,
-						compute_size<T>(n_to_clear));
-
+					memory::set(dst.data + start, value, compute_size<T>(n_to_clear));
 					dst.count = start;
 				}
 			}
 
 			/**
-			 * Reallocate memory to best fit the required data count.
+			 * Reallocate memory to best fit the number of elements.
 			 *
 			 * This function will reallocate memory if the new `capacity`
 			 * calculated from the `count` value would result into an smaller
 			 * buffer than the current one. This function must be considered
-			 * an expensive process, because, in case of a reallocation, this
-			 * function will always perform alloc/move/release operations.
+			 * an expensive process, because, in case of a reallocation,
+			 * it will always perform alloc/move/release operations.
 			 *
 			 * @tparam T POD type
 			 * @param dst Array to operate on
@@ -494,7 +438,7 @@ namespace angie {
 				}
 
 				auto new_capacity = compute_capacity(dst.count);
-				if (new_capacity < dst.capacity) {
+				if (new_capacity < get_capacity(dst)) {
 					// We can't simply `realloc` here, because most of the
 					// allocators do not truly reallocate memory if the
 					// given size is less than the original one used when
@@ -507,7 +451,7 @@ namespace angie {
 					// `new_capacity` size, move data from the original one
 					// and finally release the old memory.
 					auto* new_data = static_cast<T*>(dst.allocator->alloc(
-						compute_size<T>(new_capacity), get_align<T>()));
+						compute_size<T>(new_capacity), get_type_alignment<T>()));
 
 					// Allocation might fail
 					if (new_data == nullptr) {
@@ -517,7 +461,7 @@ namespace angie {
 					// dst.data must be not-null, because we check
 					// whether the new capacity is less than the old
 					// one, therefore dst.data for being null,
-					// dst.capacity should be zero and we would never
+					// the capacity should be zero and we would never
 					// enter this block as capacity is of an unsigned.
 					angie_assert(dst.data, "dst.data can't be null");
 					memory::move(new_data, dst.data,
@@ -560,7 +504,7 @@ namespace angie {
 				// Check whether the final capacity of the buffer would
 				// differ, if this is not the case, then, there is no need
 				// for reallocating memory.
-				if (new_capacity == dst.capacity) {
+				if (new_capacity == get_capacity(dst)) {
 					dst.count = new_size;
 					return true;
 				}
@@ -570,7 +514,7 @@ namespace angie {
 				// we issue a `realloc`, although, memory will probably
 				// be truly reallocated only for the letter case.
 				auto* new_data = static_cast<T*>(dst.allocator->realloc(
-					dst.data, compute_size<T>(new_capacity), get_align<T>()));
+					dst.data, compute_size<T>(new_capacity), get_type_alignment<T>()));
 
 				// Either both `capacity` and `data` are null,
 				// or both need to be valid.
@@ -845,6 +789,44 @@ namespace angie {
 			}
 
 			/**
+			 * Create a copy of the given array.
+			 *
+			 * This function initialise the destination array copying the given
+			 * one. Moreover, you can pick only a sub portion of the array to
+			 * be copied. The destination array can have an invalid allocator,
+			 * in such case, the one from the source will be used.
+			 * The number of elements to copy will be clamped to the maximum
+			 * available from the source array.
+			 *
+			 * @tparam T POD type
+			 * @param dst The copy of source array
+			 * @param src Source array to copy data from
+			 * @param from Position where starting to copy from
+			 * @param num Number of elements to copy
+			 * @return true if successful, false otherwise
+			 */
+			template <typename T>
+			inline types::boolean copy(dynamic_array<T>& dst,
+				const dynamic_array<const T>& src, types::uintptr from = 0,
+				types::size num = SIZE_MAX) {
+				angie_assert(from < src.count);
+				angie_assert(is_empty(dst));
+
+				if (!dst.allocator) {
+					dst.allocator = src.allocator;
+				}
+
+				auto count = algorithm::min(src.count - from, num);
+				if (count && resize(dst, count)) {
+					return !!(memory::copy(dst.data, src.data + from,
+						compute_size<T>(count)));
+				}
+
+				// Do not consider zero size calls an error.
+				return false || count == 0;
+			}
+
+			/**
 			 * Insert elements from the source array into the destination.
 			 *
 			 * This function will make space in the destination array starting
@@ -878,6 +860,39 @@ namespace angie {
 			}
 
 			/**
+			 * Insert elements from the source array into the destination.
+			 *
+			 * This function will make space in the destination array starting
+			 * at `at` in order to be able to store `num` more elements, which
+			 * then will be copied from the source array.
+			 *
+			 * @tparam T POD type
+			 * @param dst Destination array to grow
+			 * @param at Position where to insert elements from
+			 * @param src Source array to copy elements from
+			 * @param from Position where starting to copy from
+			 * @param num Number of elements to copy
+			 * @return true if successful, false otherwise
+			 */
+			template <typename T>
+			inline types::boolean insert(dynamic_array<T>& dst, types::uintptr at,
+				const dynamic_array<const T>& src, types::uintptr from = 0,
+				types::size num = SIZE_MAX) {
+				angie_assert(is_valid(dst));
+				angie_assert(at < SIZE_MAX);
+				angie_assert(from < src.count);
+
+				auto n_to_copy = algorithm::min(src.count - from, num);
+				if (n_to_copy && make_space(dst, at, n_to_copy)) {
+					return write_buffer(src.data + from,
+						compute_size<T>(n_to_copy), dst, at);
+				}
+
+				// Do not consider a zero size copy an error
+				return false || n_to_copy == 0;
+			}
+
+			/**
 			 * Append elements from the source array into the destination.
 			 *
 			 * This function will make space in the destination array starting
@@ -892,7 +907,32 @@ namespace angie {
 			 * @return true if successful, false otherwise
 			 */
 			template <typename T>
-			inline types::boolean append(dynamic_array<T>& dst, const dynamic_array<T>& src,
+			inline types::boolean append(dynamic_array<T>& dst,
+				const dynamic_array<T>& src,
+				types::uintptr from = 0, types::size num = SIZE_MAX) {
+				angie_assert(is_valid(dst));
+				angie_assert(from < src.count);
+
+				return insert(dst, dst.count, src);
+			}
+
+			/**
+			 * Append elements from the source array into the destination.
+			 *
+			 * This function will make space in the destination array starting
+			 * at the end in order to be able to store `num` more elements, which
+			 * then will be copied from the source array.
+			 *
+			 * @tparam T POD type
+			 * @param dst Destination array to grow
+			 * @param src Source array to copy elements from
+			 * @param from Position where starting to copy from
+			 * @param num Number of elements to copy
+			 * @return true if successful, false otherwise
+			 */
+			template <typename T>
+			inline types::boolean append(dynamic_array<T>& dst,
+				const dynamic_array<const T>& src,
 				types::uintptr from = 0, types::size num = SIZE_MAX) {
 				angie_assert(is_valid(dst));
 				angie_assert(from < src.count);
@@ -911,8 +951,33 @@ namespace angie {
 			 * @return true if successful, false otherwise
 			 */
 			template <typename T>
-			inline types::boolean extract(dynamic_array<T>& src, types::uintptr from,
-				types::size num, dynamic_array<T>& dst) {
+			inline types::boolean extract(dynamic_array<T>& src,
+				types::uintptr from, types::size num, dynamic_array<T>& dst) {
+				angie_assert(is_valid(src));
+				angie_assert(is_valid(dst));
+
+				// Copy from an array to another
+				if (copy(dst, src, from, num)) {
+					// Remove those elements that have been copied
+					return remove(src, from, num);
+				}
+				
+				return false;
+			}
+
+			/**
+			 * Remove the range of elements from `src` and copy to `dst`.
+			 *
+			 * @tparam T POD type
+			 * @param src Source array to extract elements from
+			 * @param from Position where starting to remove from
+			 * @param num Number of elements to extract
+			 * @param dst Destination array to hold the extracted elements
+			 * @return true if successful, false otherwise
+			 */
+			template <typename T>
+			inline types::boolean extract(dynamic_array<const T>& src,
+				types::uintptr from, types::size num, dynamic_array<T>& dst) {
 				angie_assert(is_valid(src));
 				angie_assert(is_valid(dst));
 
@@ -969,30 +1034,6 @@ namespace angie {
 				}
 
 				return false;
-			}
-
-			/**
-			 * Make a new copy of the source array.
-			 *
-			 * @tparam T POD type
-			 * @param src Source array to copy elements from
-			 * @param new_allocator Allocator used to make the new array
-			 * @return A new array if we successfully create and copied the
-			 *         elements over from the source array, nullptr otherwise.
-			 */
-			template <typename T>
-			inline dynamic_array<T>* make_copy(const dynamic_array<T>& src,
-				const memory::allocator* new_allocator =
-					memory::get_default_allocator()) {
-				angie_assert(is_valid(src));
-
-				if (auto* new_array = make_dynamic_array<T>(src.count, new_allocator)) {
-					if (copy(*new_array, src)) {
-						return new_array;
-					}
-				}
-
-				return nullptr;
 			}
 		}
 	}

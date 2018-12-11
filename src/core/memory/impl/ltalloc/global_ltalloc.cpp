@@ -52,15 +52,15 @@ namespace angie {
                     // If pointer and size are valid, then, check
                     // the current state of the given pointer, and
                     // if the new size and alignment
-                    size_t osz = ltmsize(ptr);
-                    size_t oal = utils::alignment_of((uintptr_t) ptr);
+                    const size_t osz = ltmsize(ptr);
+                    const size_t oal = utils::alignment_of((uintptr_t) ptr);
                     if (sz <= osz) {
                         if (oal >= al) {
                             return ptr;
                         }
                     }
 
-                    size_t nal = (oal < al) ? al : oal;
+                    const size_t nal = (oal < al) ? al : oal;
                     void* nptr = ltmemalign(sz, nal);
 
                     // memory move can't cope with null pointers,
