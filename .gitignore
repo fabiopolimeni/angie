@@ -259,3 +259,6 @@ paket-files/
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+# Emscripten
+tools/emsdk_set_env.ps1

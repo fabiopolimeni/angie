@@ -36,7 +36,7 @@ namespace angie {
             template<class T>
 			inline constexpr
             const T& clamp(const T& v, const T& lo, const T& hi,
-                            predicate<T> cmp = less)
+                predicate<T> cmp = less)
             {
                 return cmp(v, lo) ? lo : cmp(hi, v) ? hi : v;
             }

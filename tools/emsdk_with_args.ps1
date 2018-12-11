@@ -16,7 +16,7 @@ if (-Not $EMSDK_PY) {
 # Tell EMSDK to create environment variable setter as a .ps1 file
 $env:EMSDK_POWERSHELL = 1
 
-& $EMSDK_PY "$ScriptDirectory/emsdk" $args
+& $EMSDK_PY "$ScriptDirectory\emsdk\emsdk" $args
 
 # python is not able to set environment variables to the parent calling process, so
 # therefore have it craft a .ps1 file, which we invoke after finishing python execution,
