@@ -33,7 +33,7 @@ namespace angie {
              * memory::allocate(), memory::deallocate() and memory::reallocate()
              * @return System default allocator;
              */
-            const allocator* get_default_allocator();
+            const allocator& get_default_allocator();
 
         }
     }

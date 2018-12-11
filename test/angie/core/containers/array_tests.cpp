@@ -14,12 +14,12 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 	using namespace angie::core;
 
 	SECTION("Init/Release array") {
-		containers::dynamic_array<types::uint32> u32_array = { 0 };
+		containers::dynamic_array<types::uint32> u32_array = {
+			nullptr,  0, 0
+		};
 
-		u32_array.allocator = memory::get_default_allocator();
 		REQUIRE(containers::init(u32_array, 1));
 
-		u32_array.allocator = memory::get_default_allocator();
 		REQUIRE(containers::init(u32_array, 12));
 		REQUIRE(u32_array.data != nullptr);
 		REQUIRE(u32_array.count == 0);
@@ -30,8 +30,9 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 	}
 
 	SECTION("Reserve memory") {
-		containers::dynamic_array<types::uint32> u32_array = { 0 };
-		u32_array.allocator = memory::get_default_allocator();
+		containers::dynamic_array<types::uint32> u32_array = {
+			nullptr,  0, 0
+		};
 
 		containers::reserve(u32_array, 4);
 		REQUIRE(containers::get_state(u32_array) == containers::state::ready);
@@ -47,7 +48,9 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 	}
 
 	SECTION("Resize array") {
-		containers::dynamic_array<types::int16> i16_a = { 0 };
+		containers::dynamic_array<types::int16> i16_a = {
+			nullptr,  0, 0, memory::get_default_allocator()
+		};
 		
 		REQUIRE(containers::init(i16_a));
 		REQUIRE(containers::is_valid(i16_a));
@@ -71,8 +74,9 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 	}
 
 	SECTION("Clear array") {
-		containers::dynamic_array<types::uint32> u32_a = { 0 };
-		u32_a.allocator = memory::get_default_allocator();
+		containers::dynamic_array<types::uint32> u32_a = {
+			nullptr,  0, 0, memory::get_default_allocator()
+		};
 
 		REQUIRE(containers::resize(u32_a, 5));
 		REQUIRE(u32_a.count == 5);
@@ -86,8 +90,9 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 	}
 
 	SECTION("Refit array") {
-		containers::dynamic_array<types::uint32> u32_a = { 0 };
-		u32_a.allocator = memory::get_default_allocator();
+		containers::dynamic_array<types::uint32> u32_a = {
+			nullptr,  0, 0, memory::get_default_allocator()
+		};
 
 		REQUIRE(containers::resize(u32_a, 5));
 		REQUIRE(u32_a.count == 5);
@@ -110,8 +115,9 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 	}
 
 	SECTION("Set elements") {
-		containers::dynamic_array<types::uint32> u32_a = { 0 };
-		u32_a.allocator = memory::get_default_allocator();
+		containers::dynamic_array<types::uint32> u32_a = {
+			nullptr,  0, 0, memory::get_default_allocator()
+		};
 
 		REQUIRE(containers::resize(u32_a, 5));
 		REQUIRE(containers::set(u32_a, 57u, 0, 7));
@@ -128,8 +134,9 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 	}
 
 	SECTION("Add elements") {
-		containers::dynamic_array<types::uint32> u32_a = { 0 };
-		u32_a.allocator = memory::get_default_allocator();
+		containers::dynamic_array<types::uint32> u32_a = {
+			nullptr,  0, 0, memory::get_default_allocator()
+		};
 
 		REQUIRE(containers::init(u32_a, 8));
 		REQUIRE(containers::is_empty(u32_a));
@@ -172,8 +179,9 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 	}
 
 	SECTION("Remove elements") {
-		containers::dynamic_array<types::uint32> u32_a = { 0 };
-		u32_a.allocator = memory::get_default_allocator();
+		containers::dynamic_array<types::uint32> u32_a = {
+			nullptr,  0, 0, memory::get_default_allocator()
+		};
 
 		REQUIRE(containers::init(u32_a, 7));
 		REQUIRE(containers::resize(u32_a, 7));
@@ -204,8 +212,9 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 	}
 
 	SECTION("Loose/Replace elements") {
-		containers::dynamic_array<types::uint8> u8_a = { 0 };
-		u8_a.allocator = memory::get_default_allocator();
+		containers::dynamic_array<types::uint8> u8_a = {
+			nullptr,  0, 0, memory::get_default_allocator()
+		};
 
 		REQUIRE(containers::init(u8_a, 8));
 		REQUIRE(containers::resize(u8_a, 8));
@@ -239,29 +248,28 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 	}
 
 	SECTION("Write buffers") {
-		containers::dynamic_array<types::char8> str_a = { 0 };
-		str_a.allocator = memory::get_default_allocator();
-
-		const containers::dynamic_array<const types::char8> phrase_a = {
-			"Lore Ipsum est", 14, 0, nullptr
+		containers::dynamic_array<types::char8> str_a = {
+			nullptr,  0, 0, memory::get_default_allocator()
 		};
+
+		const types::char8* str_buffer = "Lore Ipsum est";
 
 		REQUIRE(containers::resize(str_a, 14));
 
-		REQUIRE(containers::write_buffer(phrase_a.data, 4, str_a));
-		REQUIRE(memory::is_equal(str_a.data, phrase_a.data, 4));
+		REQUIRE(containers::write_buffer(str_buffer, 4, str_a));
+		REQUIRE(memory::is_equal(str_a.data, str_buffer, 4));
 
-		REQUIRE(containers::write_buffer(phrase_a.data,
-			containers::compute_size<types::char8>(phrase_a.count), str_a));
-		REQUIRE(containers::equal(str_a, phrase_a));
+		REQUIRE(containers::write_buffer(str_buffer, 14, str_a));
+		REQUIRE(memory::is_equal(str_a.data, str_buffer, 14));
 	}
 
 	SECTION("Copy array") {
-		containers::dynamic_array<types::char8> str_a = { 0 };
-		str_a.allocator = memory::get_default_allocator();
+		containers::dynamic_array<types::char8> str_a = {
+			nullptr,  0, 0, memory::get_default_allocator()
+		};
 
 		const containers::dynamic_array<const types::char8> phrase_a = {
-			"Lore Ipsum est", 14, 0, nullptr
+			"Lore Ipsum est", 14, 0, memory::get_default_allocator()
 		};
 
 		REQUIRE(containers::copy(str_a, phrase_a));
@@ -269,15 +277,16 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 	}
 
 	SECTION("Insert array") {
-		containers::dynamic_array<types::char8> str_a = { 0 };
-		str_a.allocator = memory::get_default_allocator();
+		containers::dynamic_array<types::char8> str_a = {
+			nullptr,  0, 0, memory::get_default_allocator()
+		};
 
 		const containers::dynamic_array<const types::char8> name_a = {
-			"Fabio", 5, 0, nullptr
+			"Fabio", 5, 0, memory::get_default_allocator()
 		};
 
 		const containers::dynamic_array<const types::char8> surname_a = {
-			"Polimeni", 8, 0, nullptr
+			"Polimeni", 8, 0, memory::get_default_allocator()
 		};
 
 		// [?,P,o,l,i,m,e,n,i]
@@ -293,11 +302,12 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 	}
 
 	SECTION("Append array") {
-		containers::dynamic_array<types::char8> str_a = { 0 };
-		str_a.allocator = memory::get_default_allocator();
+		containers::dynamic_array<types::char8> str_a = {
+			nullptr,  0, 0, memory::get_default_allocator()
+		};
 
 		const containers::dynamic_array<const types::char8> phrase_a = {
-			"Lore Ipsum est", 14, 0, nullptr
+			"Lore Ipsum est", 14, 0, memory::get_default_allocator()
 		};
 
 		REQUIRE(containers::append(str_a, phrase_a));
@@ -305,10 +315,14 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 	}
 
 	SECTION("Extract array") {
-		containers::dynamic_array<types::char8> into_a = { 0 };
+		containers::dynamic_array<types::char8> into_a = {
+			nullptr,  0, 0, memory::get_default_allocator()
+		};
 		REQUIRE(containers::init(into_a));
 
-		containers::dynamic_array<types::char8> from_a = { 0 };
+		containers::dynamic_array<types::char8> from_a = {
+			nullptr,  0, 0, memory::get_default_allocator()
+		};
 		REQUIRE(containers::init(from_a, 14));
 		REQUIRE(containers::resize(from_a, 14));
 		REQUIRE(containers::write_buffer("Lore Ipsum est", 14, from_a));
@@ -320,10 +334,13 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 
 	SECTION("Push/Pop elements") {
 		const containers::dynamic_array<const types::char8> phrase_a = {
-			"Lore", 4, 0, nullptr
+			"Lore", 4, 0, memory::get_default_allocator()
 		};
 
-		containers::dynamic_array<types::char8> str_a = { 0 };
+		containers::dynamic_array<types::char8> str_a = {
+			nullptr,  0, 0, memory::get_default_allocator()
+		};
+
 		containers::init(str_a);
 		containers::copy(str_a, phrase_a);
 		

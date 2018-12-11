@@ -94,7 +94,7 @@ namespace angie {
 				T* ANGIE_RESTRICT           data;
 				types::size                 count;
 				types::size					capacity;
-				const memory::allocator*    allocator;
+				const memory::allocator&    allocator =  memory::get_default_allocator();
 			};
 
 			/**
@@ -107,10 +107,6 @@ namespace angie {
 			 */
 			template <typename T>
 			inline state get_state(const dynamic_array<T>& arr) {
-				// if (arr.allocator == nullptr) {
-				// 	return state::invalid_allocator;
-				// }
-
 				if (arr.data) {
 					// If data is not null, then count must be less or equal to
 					// capacity, and the capacity cannot be zero. Finally memory
@@ -284,22 +280,6 @@ namespace angie {
 			}
 
 			/**
-			 * Whether or not the memory of the array can be managed.
-			 *
-			 * An array declared at initialisation time that doesn't have an
-			 * allocator assigned, is still a valid array, but its memory cannot
-			 * be allocated, freed, or manipulated by the functions.
-			 *
-			 * @tparam T POD type
-			 * @param arr Array object to check
-			 * @return true if an allocator is given, false otherwise
-			 */
-			template <typename T>
-			inline types::boolean is_managed(const dynamic_array<T>& arr) {
-				return (arr.allocator != nullptr);
-			}
-			
-			/**
 			 * Release memory and zero array's properties.
 			 *
 			 * @tparam T POD type
@@ -308,8 +288,8 @@ namespace angie {
 			template <typename T>
 			inline void release(dynamic_array<T>& arr) {
 				angie_assert(is_valid(arr));
-				if (arr.data && arr.allocator) {
-					arr.allocator->free(arr.data);
+				if (arr.data) {
+					arr.allocator.free(arr.data);
 					arr.data = nullptr;
 				}
 
@@ -333,11 +313,11 @@ namespace angie {
 			inline types::boolean reserve(dynamic_array<T>& dst, types::size num) {
 				angie_assert(is_valid(dst));
 
-				if (dst.allocator && num > 0) {
+				if (num > 0) {
 					auto new_count = num + dst.count;
 					auto new_capacity = compute_capacity(new_count);
 
-					auto new_data = static_cast<T*>(dst.allocator->realloc(
+					auto new_data = static_cast<T*>(dst.allocator.realloc(
 						dst.data, compute_size<T>(new_capacity),
 						get_type_alignment<T>()));
 
@@ -350,7 +330,7 @@ namespace angie {
 					return (new_data != nullptr);
 				}
 
-				return true && dst.allocator;
+				return true;
 			}
 
 			/**
@@ -369,13 +349,11 @@ namespace angie {
 			 * false otherwise.
 			 */
 			template <typename T>
-			inline types::boolean init(dynamic_array<T>& dst, types::size num = 0,
-				const memory::allocator* alloc_to_use = memory::get_default_allocator()) {
+			inline types::boolean init(dynamic_array<T>& dst, types::size num = 0) {
 				if (!is_empty(dst)) {
 					release(dst);
 				}
 
-				dst.allocator = alloc_to_use;
 				return reserve(dst, num);
 			}
 
@@ -432,7 +410,7 @@ namespace angie {
 				// as much memory as possible, this would not be a
 				// desirable behaviour, hence, if count == 0, we make this
 				// function to behave as release().
-				if (!dst.allocator || dst.count == 0) {
+				if (dst.count == 0) {
 					release(dst);
 					return true;
 				}
@@ -450,7 +428,7 @@ namespace angie {
 					// this function call, hence, we allocate a new buffer of
 					// `new_capacity` size, move data from the original one
 					// and finally release the old memory.
-					auto* new_data = static_cast<T*>(dst.allocator->alloc(
+					auto* new_data = static_cast<T*>(dst.allocator.alloc(
 						compute_size<T>(new_capacity), get_type_alignment<T>()));
 
 					// Allocation might fail
@@ -469,7 +447,7 @@ namespace angie {
 
 					// Whether we have allocated new memory or not, this
 					// function results in freeing the previous buffer.
-					dst.allocator->free(dst.data);
+					dst.allocator.free(dst.data);
 					dst.data = new_data;
 					dst.capacity = new_capacity;
 				}
@@ -490,14 +468,8 @@ namespace angie {
 			 * @return true if successful, false otherwise
 			 */
 			template <typename T>
-			inline types::boolean resize(dynamic_array<T>& dst,
-				types::size new_size) {
+			inline types::boolean resize(dynamic_array<T>& dst, types::size new_size) {
 				angie_assert(is_valid(dst));
-
-				// No allocator no party
-				if (!dst.allocator) {
-					return false;
-				}
 
 				auto new_capacity = compute_capacity(new_size);
 
@@ -513,7 +485,7 @@ namespace angie {
 				// less, or greater than the current one, in both cases
 				// we issue a `realloc`, although, memory will probably
 				// be truly reallocated only for the letter case.
-				auto* new_data = static_cast<T*>(dst.allocator->realloc(
+				auto* new_data = static_cast<T*>(dst.allocator.realloc(
 					dst.data, compute_size<T>(new_capacity), get_type_alignment<T>()));
 
 				// Either both `capacity` and `data` are null,
@@ -751,6 +723,33 @@ namespace angie {
 			}
 
 			/**
+			 * Make sure the array will be able to accommodate elements from buffer.
+			 *
+			 * This function will copy memory from the buffer, into the array.
+			 * It will make space if the buffer size is greater than the
+			 * current array size. This function can be, used to de-serialize
+			 * an array from a raw blob of memory, if the array is capable of
+			 * containing enough elements.
+			 *
+			 * @tparam T POD type
+			 * @param src Source buffer to copy from
+			 * @param n_bytes Number of bytes to write
+			 * @param dst Destination buffer
+			 * @param at Position where starting to write from
+			 * @return true if successful, false otherwise
+			 */
+			template <typename T>
+			inline types::boolean from_buffer(const void* src,
+				types::size n_bytes, dynamic_array<T>& dst,
+				types::uintptr at = 0) {
+				angie_assert(src, "Source buffer must be valid");
+				angie_assert(at < dst.count);
+				angie_assert(n_bytes <= compute_size<T>(dst.count - at));
+
+				return !!(memory::copy(dst.data + at, src, n_bytes));
+			}
+
+			/**
 			 * Create a copy of the given array.
 			 *
 			 * This function initialise the destination array copying the given
@@ -773,10 +772,6 @@ namespace angie {
 				types::size num = SIZE_MAX) {
 				angie_assert(from < src.count);
 				angie_assert(is_empty(dst));
-
-				if (!dst.allocator) {
-					dst.allocator = src.allocator;
-				}
 
 				auto count = algorithm::min(src.count - from, num);
 				if (count && resize(dst, count)) {
@@ -811,10 +806,6 @@ namespace angie {
 				types::size num = SIZE_MAX) {
 				angie_assert(from < src.count);
 				angie_assert(is_empty(dst));
-
-				if (!dst.allocator) {
-					dst.allocator = src.allocator;
-				}
 
 				auto count = algorithm::min(src.count - from, num);
 				if (count && resize(dst, count)) {

@@ -17,8 +17,8 @@ namespace angie {
                     memory::reallocate,
             };
 
-            const allocator* get_default_allocator() {
-                return &g_default_alloc;
+            const allocator& get_default_allocator() {
+                return g_default_alloc;
             }
 
         }
