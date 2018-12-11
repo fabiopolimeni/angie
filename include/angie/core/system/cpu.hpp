@@ -11,12 +11,12 @@
 
 namespace angie {
     namespace core {
-        namespace cpu {
+        namespace system {
 
             /**
              * Some major cpu features identifiers
              */
-            enum class feature : uint16_t {
+            enum class cpu_feature : uint16_t {
                 PSE,                /*!< Page size extension */
                 TSC,                /*!< Time-stamp counter */
                 CLFLUSH,            /*!< CLFLUSH instruction supported */
@@ -76,7 +76,7 @@ namespace angie {
             /**
              * Typical cache level identifiers
              */
-            enum class cache : uint8_t {
+            enum class cpu_cache : uint8_t {
                 L1,
                 L2,
                 L3,
@@ -96,14 +96,14 @@ namespace angie {
 			 * @param cache_lines Cache line sizes per cache level
 			 * @param features CPU capable features
              */
-            struct info {
+            struct cpu_info {
                 const types::char8*     name;
                 const types::index		id;
                 const types::uint32     physical_cores;
                 const types::uint32     logical_processors;
-                const types::size       cache_sizes[static_cast<uint8_t>(cache::COUNT)];
-                const types::size       cache_lines[static_cast<uint8_t>(cache::COUNT)];
-                const types::boolean    features[static_cast<uint16_t>(feature::COUNT)];
+                const types::size       cache_sizes[static_cast<uint8_t>(cpu_cache::COUNT)];
+                const types::size       cache_lines[static_cast<uint8_t>(cpu_cache::COUNT)];
+                const types::boolean    features[static_cast<uint16_t>(cpu_feature::COUNT)];
             };
 
             /**
@@ -118,7 +118,7 @@ namespace angie {
              * @return true if query CPU info is supported on the current
 			 *         system, false otherwise.
              */
-            types::boolean query(containers::dynamic_array<info*>& cpus);
+            types::boolean query_cpu_info(containers::dynamic_array<cpu_info*>& cpus);
 
 			/**
 			 * Return the current CPU the calling thread is running on.
@@ -129,7 +129,7 @@ namespace angie {
 			 *
 			 * @return CPU id if valid, or `invalid_index` if fails.
 			 */
-			types::index get_current_id();
+			types::index get_current_cpu_id();
 
         }
     }

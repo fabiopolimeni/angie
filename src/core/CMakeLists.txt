@@ -5,38 +5,38 @@ add_library(angie_core STATIC "")
 
 # Shared resources
 set(HEADER_FILES
-        ${ANGIE_INCLUDE_DIR}/angie/core/base.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/types.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/config.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/defines.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/version.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/utils.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/algorithm.hpp)
+	${ANGIE_INCLUDE_DIR}/angie/core/base.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/types.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/config.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/defines.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/version.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/utils.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/algorithm.hpp)
 
 set(INTERFACE_FILES
-        ${ANGIE_INCLUDE_DIR}/angie/core/diagnostics/assert.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/diagnostics/callstack.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/diagnostics/debugger.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/diagnostics/hardware_break.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/memory/global.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/memory/manipulation.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/memory/allocator.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/containers/common.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/containers/dynamic_array.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/system/system.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/system/cpu.hpp)
+	${ANGIE_INCLUDE_DIR}/angie/core/diagnostics/assert.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/diagnostics/callstack.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/diagnostics/debugger.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/diagnostics/hardware_break.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/memory/global.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/memory/manipulation.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/memory/allocator.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/containers/common.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/containers/dynamic_array.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/system/system.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/system/cpu.hpp)
 
 set(SOURCE_FILES
-        memory/global.cpp
-        memory/manipulation.cpp
-        memory/allocator.cpp
-        system/system.cpp
-		system/cpu.cpp)
+	memory/global.cpp
+	memory/manipulation.cpp
+	memory/allocator.cpp
+	system/system.cpp
+	system/cpu.cpp)
 
 set(IMPLEMENTATION_FILES
-        memory/impl/global_impl.hpp
-        system/impl/system_impl.hpp
-		system/impl/cpu_impl.hpp)
+	memory/impl/global_impl.hpp
+	system/impl/system_impl.hpp
+	system/impl/cpu_impl.hpp)
 
 # Debug
 set(SOURCE_DEBUG_FILES "")
@@ -59,22 +59,22 @@ if (angie_debug_tools)
 	endif()
 
     set_source_files_properties(${DBGTOOLS_DIR_SRC}/assert.cpp
-            PROPERTIES
-            COMPILE_DEFINITIONS DBG_TOOLS_ASSERT_ENABLE
-            LANGUAGE CXX)
+		PROPERTIES
+		COMPILE_DEFINITIONS DBG_TOOLS_ASSERT_ENABLE
+		LANGUAGE CXX)
 
     list(APPEND SOURCE_DEBUG_FILES
-            ${DBGTOOLS_DIR_INC}/assert.h
-            ${DBGTOOLS_DIR_SRC}/assert.cpp
-            ${DBGTOOLS_DIR_INC}/callstack.h
-            ${DBGTOOLS_DIR_SRC}/callstack.cpp
-            ${DBGTOOLS_DIR_INC}/debugger.h
-            ${DBGTOOLS_DIR_SRC}/debugger.cpp
-            ${DBGTOOLS_DIR_INC}/hw_breakpoint.h
-            ${DBGTOOLS_DIR_SRC}/hw_breakpoint.cpp)
+		${DBGTOOLS_DIR_INC}/assert.h
+		${DBGTOOLS_DIR_SRC}/assert.cpp
+		${DBGTOOLS_DIR_INC}/callstack.h
+		${DBGTOOLS_DIR_SRC}/callstack.cpp
+		${DBGTOOLS_DIR_INC}/debugger.h
+		${DBGTOOLS_DIR_SRC}/debugger.cpp
+		${DBGTOOLS_DIR_INC}/hw_breakpoint.h
+		${DBGTOOLS_DIR_SRC}/hw_breakpoint.cpp)
 
 	list(APPEND SOURCE_DEBUG_FILES
-            diagnostics/callstack.cpp)
+		diagnostics/callstack.cpp)
 endif()
 
 # Memory

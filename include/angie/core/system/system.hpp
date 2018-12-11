@@ -34,7 +34,7 @@ namespace angie {
                 using callback = void (level lvl, const types::char8* msg);
 
 				struct settings {
-					callback*		call_back;
+					callback*		callback;
 					level			min_level;
 					types::boolean	exit_on_error;
 					types::boolean	abort_on_fatal;

@@ -12,16 +12,17 @@
 TEST_CASE("CPU tests", "[cpu]")
 {
 	using namespace angie::core;
+	using namespace angie::core::system;
 
 	SECTION("CPU query info") {
-		containers::dynamic_array<cpu::info*> cpu_infos = { 
+		containers::dynamic_array<cpu_info*> cpu_infos = { 
 			nullptr, 0, 0
 		 };
 		 
-		REQUIRE(cpu::query(cpu_infos));
+		REQUIRE(system::query_cpu_info(cpu_infos));
 	}
 
 	SECTION("CPU current id") {
-		REQUIRE(cpu::get_current_id() != invalid_index);
+		REQUIRE(system::get_current_cpu_id() != invalid_index);
 	}
 }

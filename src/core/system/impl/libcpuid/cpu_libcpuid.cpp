@@ -9,14 +9,14 @@
 
 namespace angie {
 	namespace core {
-		namespace cpu {
+		namespace system {
 			namespace impl {
 
-				types::boolean query(containers::dynamic_array<info*>& cpus) {
+				types::boolean query_cpu_info(containers::dynamic_array<cpu_info*>& cpus) {
 					return false;
 				}
 
-				types::index get_current_id() {
+				types::index get_current_cpu_id() {
 					return invalid_index;
 				}
 

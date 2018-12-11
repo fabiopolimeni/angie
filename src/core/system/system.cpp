@@ -22,9 +22,9 @@ assert_action assert_callback(const char* cond, const char* msg,
 	using namespace angie::core::types;
 	using namespace angie::core::system;
 
-	auto* system_cb = static_cast<report::callback*>(user_data);
+	auto* report_cb = report::get_callback();
 
-	if (system_cb) {
+	if (report_cb) {
 		static const auto max_chars = 256;
 		char8 assert_string[max_chars] = { 0 };
 
@@ -32,7 +32,7 @@ assert_action assert_callback(const char* cond, const char* msg,
 		snprintf(assert_string, max_chars,
 			"!! ASSERT !!: (%s) %s [%s:%d]\n",	cond, msg, file, line);
 
-		system_cb(report::level::fatal, assert_string);
+		report_cb(report::level::fatal, assert_string);
 	}
 
 	// You can use assert_action::ASSERT_ACTION_NONE
@@ -56,7 +56,7 @@ extern "C" void atexit_callback() {
 			1, addresses, max_addresses)) {
 			const static auto names_buffer_size = max_addresses * 512u;
 			types::char8 names_buffer[names_buffer_size] = { 0 };
-			diagnostics::symbol symbols[max_addresses] = { 0 };
+			diagnostics::symbol symbols[max_addresses] = { { 0 } };
 
 			// We need to store the whole symbol structure in strings
 			const static auto string_buffer_size = max_addresses * 1024u;
@@ -137,11 +137,8 @@ namespace angie {
 				g_settings = sets;
 
 #ifdef ANGIE_DEBUG_TOOLS
-				if (g_settings.call_back) {
-					// Register the assert callback
-					assert_register_callback(assert_callback,
-						g_settings.call_back);
-				}
+				// Register the assert callback
+				assert_register_callback(assert_callback, nullptr);
 #endif
 
 				atexit(atexit_callback);
@@ -149,7 +146,7 @@ namespace angie {
 			}
 
 			report::callback* report::get_callback() {
-				return g_settings.call_back;
+				return g_settings.callback;
 			}
 
 			report::settings& report::get_settings() {
@@ -157,11 +154,11 @@ namespace angie {
 			}
 
 			void report::issue(report::level lvl, const types::char8* msg) {
-				if (g_settings.min_level < lvl || !g_settings.call_back) {
+				if (g_settings.min_level < lvl || !g_settings.callback) {
 					return;
 				}
 
-				g_settings.call_back(lvl, msg);
+				g_settings.callback(lvl, msg);
 				
 				if (lvl == report::level::error
 					&& g_settings.exit_on_error) {

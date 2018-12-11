@@ -38,7 +38,7 @@ namespace angie {
  * All the new operators get overloaded, and we want to instruct
  * the compiler that none of those will throw and exception.
  */
-void *operator new  (size_t size) {
+void *operator new (size_t size) {
     return angie::core::memory::allocate(size);
 }
 
@@ -50,7 +50,7 @@ void *operator new[](size_t size) {
  * All the delete operators get overloaded, and we want to instruct
  * the compiler that none of those will throw and exception.
  */
-void operator delete  (void* p) {
+void operator delete (void* p) {
     angie::core::memory::deallocate(p);
 }
 
