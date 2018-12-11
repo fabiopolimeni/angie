@@ -8,7 +8,7 @@
 #include <cstring>
 
 #include "angie/core/memory/manipulation.hpp"
-#include "angie/core/debug/assert.hpp"
+#include "angie/core/diagnostics/assert.hpp"
 
 namespace angie {
     namespace core {

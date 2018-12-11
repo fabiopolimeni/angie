@@ -16,13 +16,11 @@ namespace angie {
                 /**
                  * Initializes the whole system.
                  *
-                 * @param cb Report callback function.
                  * @return error_e::ok if no error any of the error_e otherwise.
                  * @see error_e
-                 * @see report::callback()
                  * @since 0.0.1
                  */
-                error init(report::callback *cb);
+                error init();
 
                 /**
                  * Properly shuts down the system.

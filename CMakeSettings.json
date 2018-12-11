@@ -6,7 +6,7 @@
       "generator": "Visual Studio 15 2017",
       "configurationType": "Debug",
       "buildRoot": "${projectDir}\\cmake\\builds\\msvc15\\${name}",
-      "cmakeCommandArgs": "-DCMAKE_BUILD_TYPE=\"Debug\"",
+      "cmakeCommandArgs": "",
       "buildCommandArgs": "-m -v:minimal",
       "variables": [
         {

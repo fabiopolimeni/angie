@@ -16,7 +16,7 @@ namespace angie {
             /**
              * Some major cpu features identifiers
              */
-            enum feature {
+            enum class feature : uint16_t {
                 PSE,                /*!< Page size extension */
                 TSC,                /*!< Time-stamp counter */
                 CLFLUSH,            /*!< CLFLUSH instruction supported */
@@ -76,7 +76,7 @@ namespace angie {
             /**
              * Typical cache level identifiers
              */
-            enum cache {
+            enum class cache : uint8_t {
                 L1,
                 L2,
                 L3,
@@ -92,20 +92,18 @@ namespace angie {
 			 * @param id Identifies which CPU this refers to
 			 * @param physical_cores Number of physical cores
 			 * @param logical_processors Number of logical CPUs (HT)
-			 * @param data_cache Data cache sizes per cache level
-			 * @param instruction_cache Instruction cache sizes per cache level
-			 * @param cache_line Cache line sizes per cache level
+			 * @param cache_sizes Data cache sizes per cache level
+			 * @param cache_lines Cache line sizes per cache level
 			 * @param features CPU capable features
              */
             struct info {
                 const types::char8*     name;
-                const types::uint32     id;
+                const types::index		id;
                 const types::uint32     physical_cores;
                 const types::uint32     logical_processors;
-                const types::size       data_cache[cache::COUNT];
-                const types::size       instruction_cache[cache::COUNT];
-                const types::size       cache_line[cache::COUNT];
-                const types::boolean    features[feature::COUNT];
+                const types::size       cache_sizes[static_cast<uint8_t>(cache::COUNT)];
+                const types::size       cache_lines[static_cast<uint8_t>(cache::COUNT)];
+                const types::boolean    features[static_cast<uint16_t>(feature::COUNT)];
             };
 
             /**
@@ -120,7 +118,18 @@ namespace angie {
              * @return true if query CPU info is supported on the current
 			 *         system, false otherwise.
              */
-            types::boolean query(array::dynamic<info*>& cpus);
+            types::boolean query(containers::dynamic_array<info*>& cpus);
+
+			/**
+			 * Return the current CPU the calling thread is running on.
+			 * 
+			 * If a valid index is returned, this refers to the cpu stored
+			 * in the array returned by `query()` function, and the `id`
+			 * property of the `info` structure must match it.
+			 *
+			 * @return CPU id if valid, or `invalid_index` if fails.
+			 */
+			types::index get_current_id();
 
         }
     }

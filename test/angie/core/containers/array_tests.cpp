@@ -333,16 +333,18 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 	}
 
 	SECTION("Push/Pop elements") {
-		const containers::dynamic_array<const types::char8> phrase_a = {
-			"Lore", 4, 0, memory::get_default_allocator()
-		};
+		// const containers::dynamic_array<const types::char8> phrase_a = {
+		// 	"Lore", 4, 0, memory::get_default_allocator()
+		// };
 
 		containers::dynamic_array<types::char8> str_a = {
-			nullptr,  0, 0, memory::get_default_allocator()
+			nullptr,  0, 0
 		};
 
 		containers::init(str_a);
-		containers::copy(str_a, phrase_a);
+		//containers::copy(str_a, phrase_a);
+		
+		REQUIRE(containers::from_buffer("Lore", 4, str_a));
 		
 		REQUIRE(containers::push(str_a, ' '));
 		REQUIRE(containers::push(str_a, 'I'));

@@ -11,7 +11,7 @@
 #include "angie/core/algorithm.hpp"
 #include "angie/core/memory/allocator.hpp"
 #include "angie/core/memory/manipulation.hpp"
-#include "angie/core/debug/assert.hpp"
+#include "angie/core/diagnostics/assert.hpp"
 #include "angie/core/containers/common.hpp"
 
 namespace angie {
@@ -696,6 +696,32 @@ namespace angie {
 			}
 
 			/**
+			 * Grow the array to accommodate the given buffer.
+			 *
+			 * This function will make enough space, to accommodate and copy
+			 * the data contained in the buffer, into the array.
+			 * This can be, used to de-serialize an array from raw memory.
+			 *
+			 * @tparam T POD type
+			 * @param src Source buffer to copy from
+			 * @param n_bytes Number of bytes to write
+			 * @param dst Destination buffer
+			 * @param at Position where starting to write from
+			 * @return true if successful, false otherwise
+			 */
+			template <typename T>
+			inline types::boolean from_buffer(const void* src, types::size n_bytes,
+				dynamic_array<T>& dst, types::uintptr at = 0) {
+				angie_assert(src, "Source buffer must be not-null");
+				
+				if (n_bytes && make_space(dst, at, compute_count<T>(n_bytes))) {
+					return !!(memory::copy(dst.data + at, src, n_bytes));
+				}
+				
+				return false;
+			}
+
+			/**
 			 * Overwrite array's data with the given memory starting from `at`.
 			 *
 			 * This function will copy memory from the buffer, into the array.
@@ -723,33 +749,6 @@ namespace angie {
 			}
 
 			/**
-			 * Make sure the array will be able to accommodate elements from buffer.
-			 *
-			 * This function will copy memory from the buffer, into the array.
-			 * It will make space if the buffer size is greater than the
-			 * current array size. This function can be, used to de-serialize
-			 * an array from a raw blob of memory, if the array is capable of
-			 * containing enough elements.
-			 *
-			 * @tparam T POD type
-			 * @param src Source buffer to copy from
-			 * @param n_bytes Number of bytes to write
-			 * @param dst Destination buffer
-			 * @param at Position where starting to write from
-			 * @return true if successful, false otherwise
-			 */
-			template <typename T>
-			inline types::boolean from_buffer(const void* src,
-				types::size n_bytes, dynamic_array<T>& dst,
-				types::uintptr at = 0) {
-				angie_assert(src, "Source buffer must be valid");
-				angie_assert(at < dst.count);
-				angie_assert(n_bytes <= compute_size<T>(dst.count - at));
-
-				return !!(memory::copy(dst.data + at, src, n_bytes));
-			}
-
-			/**
 			 * Create a copy of the given array.
 			 *
 			 * This function initialise the destination array copying the given
@@ -760,16 +759,18 @@ namespace angie {
 			 * available from the source array.
 			 *
 			 * @tparam T POD type
+			 * @tparam U POD type
 			 * @param dst The copy of source array
 			 * @param src Source array to copy data from
 			 * @param from Position where starting to copy from
 			 * @param num Number of elements to copy
 			 * @return true if successful, false otherwise
 			 */
-			template <typename T>
+			template <typename T, typename U>
 			inline types::boolean copy(dynamic_array<T>& dst,
-				const dynamic_array<T>& src, types::uintptr from = 0,
+				const dynamic_array<U>& src, types::uintptr from = 0,
 				types::size num = SIZE_MAX) {
+                static_assert(sizeof(T) == sizeof(U));
 				angie_assert(from < src.count);
 				angie_assert(is_empty(dst));
 
@@ -782,41 +783,7 @@ namespace angie {
 				// Do not consider zero size calls an error.
 				return false || count == 0;
 			}
-
-			/**
-			 * Create a copy of the given array.
-			 *
-			 * This function initialise the destination array copying the given
-			 * one. Moreover, you can pick only a sub portion of the array to
-			 * be copied. The destination array can have an invalid allocator,
-			 * in such case, the one from the source will be used.
-			 * The number of elements to copy will be clamped to the maximum
-			 * available from the source array.
-			 *
-			 * @tparam T POD type
-			 * @param dst The copy of source array
-			 * @param src Source array to copy data from
-			 * @param from Position where starting to copy from
-			 * @param num Number of elements to copy
-			 * @return true if successful, false otherwise
-			 */
-			template <typename T>
-			inline types::boolean copy(dynamic_array<T>& dst,
-				const dynamic_array<const T>& src, types::uintptr from = 0,
-				types::size num = SIZE_MAX) {
-				angie_assert(from < src.count);
-				angie_assert(is_empty(dst));
-
-				auto count = algorithm::min(src.count - from, num);
-				if (count && resize(dst, count)) {
-					return !!(memory::copy(dst.data, src.data + from,
-						compute_size<T>(count)));
-				}
-
-				// Do not consider zero size calls an error.
-				return false || count == 0;
-			}
-
+			
 			/**
 			 * Insert elements from the source array into the destination.
 			 *
@@ -825,6 +792,7 @@ namespace angie {
 			 * then will be copied from the source array.
 			 *
 			 * @tparam T POD type
+			 * @tparam U POD type
 			 * @param dst Destination array to grow
 			 * @param at Position where to insert elements from
 			 * @param src Source array to copy elements from
@@ -832,45 +800,12 @@ namespace angie {
 			 * @param num Number of elements to copy
 			 * @return true if successful, false otherwise
 			 */
-			template <typename T>
+			template <typename T, typename U>
 			inline types::boolean insert(dynamic_array<T>& dst, types::uintptr at,
-				const dynamic_array<T>& src, types::uintptr from = 0,
+				const dynamic_array<U>& src, types::uintptr from = 0,
 				types::size num = SIZE_MAX) {
+                static_assert(sizeof(T) == sizeof(U));
 				angie_assert(is_valid(dst));
-				angie_assert(at < SIZE_MAX);
-				angie_assert(from < src.count);
-
-				auto n_to_copy = algorithm::min(src.count - from, num);
-				if (n_to_copy && make_space(dst, at, n_to_copy)) {
-					return write_buffer(src.data + from,
-						compute_size<T>(n_to_copy), dst, at);
-				}
-
-				// Do not consider a zero size copy an error
-				return false || n_to_copy == 0;
-			}
-
-			/**
-			 * Insert elements from the source array into the destination.
-			 *
-			 * This function will make space in the destination array starting
-			 * at `at` in order to be able to store `num` more elements, which
-			 * then will be copied from the source array.
-			 *
-			 * @tparam T POD type
-			 * @param dst Destination array to grow
-			 * @param at Position where to insert elements from
-			 * @param src Source array to copy elements from
-			 * @param from Position where starting to copy from
-			 * @param num Number of elements to copy
-			 * @return true if successful, false otherwise
-			 */
-			template <typename T>
-			inline types::boolean insert(dynamic_array<T>& dst, types::uintptr at,
-				const dynamic_array<const T>& src, types::uintptr from = 0,
-				types::size num = SIZE_MAX) {
-				angie_assert(is_valid(dst));
-				angie_assert(at < SIZE_MAX);
 				angie_assert(from < src.count);
 
 				auto n_to_copy = algorithm::min(src.count - from, num);
@@ -891,40 +826,18 @@ namespace angie {
 			 * then will be copied from the source array.
 			 *
 			 * @tparam T POD type
+			 * @tparam U POD type
 			 * @param dst Destination array to grow
 			 * @param src Source array to copy elements from
 			 * @param from Position where starting to copy from
 			 * @param num Number of elements to copy
 			 * @return true if successful, false otherwise
 			 */
-			template <typename T>
+			template <typename T, typename U>
 			inline types::boolean append(dynamic_array<T>& dst,
-				const dynamic_array<T>& src,
+				const dynamic_array<U>& src,
 				types::uintptr from = 0, types::size num = SIZE_MAX) {
-				angie_assert(is_valid(dst));
-				angie_assert(from < src.count);
-
-				return insert(dst, dst.count, src);
-			}
-
-			/**
-			 * Append elements from the source array into the destination.
-			 *
-			 * This function will make space in the destination array starting
-			 * at the end in order to be able to store `num` more elements, which
-			 * then will be copied from the source array.
-			 *
-			 * @tparam T POD type
-			 * @param dst Destination array to grow
-			 * @param src Source array to copy elements from
-			 * @param from Position where starting to copy from
-			 * @param num Number of elements to copy
-			 * @return true if successful, false otherwise
-			 */
-			template <typename T>
-			inline types::boolean append(dynamic_array<T>& dst,
-				const dynamic_array<const T>& src,
-				types::uintptr from = 0, types::size num = SIZE_MAX) {
+				static_assert(sizeof(T) == sizeof(U));
 				angie_assert(is_valid(dst));
 				angie_assert(from < src.count);
 
@@ -935,39 +848,15 @@ namespace angie {
 			 * Remove the range of elements from `src` and copy to `dst`.
 			 *
 			 * @tparam T POD type
+			 * @tparam U POD type
 			 * @param src Source array to extract elements from
 			 * @param from Position where starting to remove from
 			 * @param num Number of elements to extract
 			 * @param dst Destination array to hold the extracted elements
 			 * @return true if successful, false otherwise
 			 */
-			template <typename T>
-			inline types::boolean extract(dynamic_array<T>& src,
-				types::uintptr from, types::size num, dynamic_array<T>& dst) {
-				angie_assert(is_valid(src));
-				angie_assert(is_valid(dst));
-
-				// Copy from an array to another
-				if (copy(dst, src, from, num)) {
-					// Remove those elements that have been copied
-					return remove(src, from, num);
-				}
-				
-				return false;
-			}
-
-			/**
-			 * Remove the range of elements from `src` and copy to `dst`.
-			 *
-			 * @tparam T POD type
-			 * @param src Source array to extract elements from
-			 * @param from Position where starting to remove from
-			 * @param num Number of elements to extract
-			 * @param dst Destination array to hold the extracted elements
-			 * @return true if successful, false otherwise
-			 */
-			template <typename T>
-			inline types::boolean extract(dynamic_array<const T>& src,
+			template <typename T, typename U>
+			inline types::boolean extract(dynamic_array<U>& src,
 				types::uintptr from, types::size num, dynamic_array<T>& dst) {
 				angie_assert(is_valid(src));
 				angie_assert(is_valid(dst));

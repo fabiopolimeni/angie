@@ -14,27 +14,29 @@ set(HEADER_FILES
         ${ANGIE_INCLUDE_DIR}/angie/core/algorithm.hpp)
 
 set(INTERFACE_FILES
-        ${ANGIE_INCLUDE_DIR}/angie/core/debug/assert.hpp
-        #${ANGIE_INCLUDE_DIR}/angie/core/debug/callstack.hpp
-        #${ANGIE_INCLUDE_DIR}/angie/core/debug/debugger.hpp
-        #${ANGIE_INCLUDE_DIR}/angie/core/debug/hardware_break.hpp
+        ${ANGIE_INCLUDE_DIR}/angie/core/diagnostics/assert.hpp
+        ${ANGIE_INCLUDE_DIR}/angie/core/diagnostics/callstack.hpp
+        ${ANGIE_INCLUDE_DIR}/angie/core/diagnostics/debugger.hpp
+        ${ANGIE_INCLUDE_DIR}/angie/core/diagnostics/hardware_break.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/memory/global.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/memory/manipulation.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/memory/allocator.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/containers/common.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/containers/dynamic_array.hpp
         ${ANGIE_INCLUDE_DIR}/angie/core/system/system.hpp
-        ${ANGIE_INCLUDE_DIR}/angie/core/system/cpu_info.hpp)
+        ${ANGIE_INCLUDE_DIR}/angie/core/system/cpu.hpp)
 
 set(SOURCE_FILES
         memory/global.cpp
         memory/manipulation.cpp
         memory/allocator.cpp
-        system/system.cpp)
+        system/system.cpp
+		system/cpu.cpp)
 
 set(IMPLEMENTATION_FILES
         memory/impl/global_impl.hpp
-        system/impl/system_impl.hpp)
+        system/impl/system_impl.hpp
+		system/impl/cpu_impl.hpp)
 
 # Debug
 set(SOURCE_DEBUG_FILES "")
@@ -44,6 +46,17 @@ if (angie_debug_tools)
     set(DBGTOOLS_DIR_SRC ${DBGTOOLS_DIR}/src)
 
     target_include_directories(angie_core PRIVATE ${DBGTOOLS_DIR}/include)
+
+	# callstack symbol
+	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+		set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -rdynamic")
+	elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	# using GCC
+	elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+	# using Intel C++
+	elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+		target_link_libraries(angie_core Dbghelp.lib)
+	endif()
 
     set_source_files_properties(${DBGTOOLS_DIR_SRC}/assert.cpp
             PROPERTIES
@@ -59,6 +72,9 @@ if (angie_debug_tools)
             ${DBGTOOLS_DIR_SRC}/debugger.cpp
             ${DBGTOOLS_DIR_INC}/hw_breakpoint.h
             ${DBGTOOLS_DIR_SRC}/hw_breakpoint.cpp)
+
+	list(APPEND SOURCE_DEBUG_FILES
+            diagnostics/callstack.cpp)
 endif()
 
 # Memory
@@ -90,8 +106,6 @@ if (angie_system_plibsys)
     list(APPEND SOURCE_SYSTEM_FILES
             system/impl/plibsys/system_plibsys.cpp)
 
-    target_sources(angie_core PRIVATE ${SOURCE_SYSTEM_FILES})
-
     set(PLIBSYS_DIR ../../externals/plibsys)
     option(PLIBSYS_TESTS "" OFF)
     option(PLIBSYS_TESTS_STATIC "" OFF)
@@ -108,6 +122,17 @@ if (angie_system_plibsys)
     message(STATUS "System: plibsys")
 endif()
 
+# CPU - 
+set(SOURCE_CPU_FILES "")
+if (angie_cpu_libcpuid)
+	list(APPEND SOURCE_CPU_FILES system/impl/libcpuid/cpu_libcpuid.cpp)
+
+    set(LIBCPUID_DIR ../../externals/libcpuid)
+	include_directories(${LIBCPUID_DIR}/libcpuid ${CMAKE_BINARY_DIR})
+	message(STATUS "CPU: libcpuid")
+endif()
+
+
 # Add source files
 target_sources(angie_core PUBLIC ${HEADER_FILES})
 target_sources(angie_core PUBLIC ${INTERFACE_FILES})
@@ -117,6 +142,7 @@ target_sources(angie_core PRIVATE ${IMPLEMENTATION_FILES})
 target_sources(angie_core PRIVATE ${SOURCE_DEBUG_FILES})
 target_sources(angie_core PRIVATE ${SOURCE_MEMORY_FILES})
 target_sources(angie_core PRIVATE ${SOURCE_SYSTEM_FILES})
+target_sources(angie_core PRIVATE ${SOURCE_CPU_FILES})
 
 set_target_properties(angie_core PROPERTIES FOLDER "angie/core")
 install(TARGETS angie_core DESTINATION lib)

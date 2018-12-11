@@ -37,6 +37,10 @@ namespace angie {
             using size = size_t;
             using byte = uint8_t;
 
+			using index = types::uint32;
         }
+
+		const types::index invalid_index = 0xFFFFFFFF;
+
     }
 }

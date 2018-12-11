@@ -26,7 +26,7 @@ namespace angie {
         namespace system {
             namespace impl {
 
-                error init(report::callback *cb) {
+                error init() {
 
                     PMemVTable vtable;
                     vtable.free    = pmem_free;
