@@ -13,7 +13,7 @@
 #include <dbgtools/assert.h>
 
 #define angie_assert ASSERT
-#define angie_verify(cond) VERIFY(cond)
+#define angie_verify(cond) ((!(cond)) && (assert_call_trampoline( __FILE__, __LINE__, #cond ) == ASSERT_ACTION_BREAK ))
 
 #undef DBG_TOOLS_ASSERT_ENABLE
 #else
@@ -22,9 +22,9 @@
 #define angie_assert(cond, ...) assert(cond)
 
 #   if defined ANGIE_DEBUG
-#   define angie_verify(cond) ((void)((!(cond)) && assert(cond)))
+#   define angie_verify(cond) ((!(cond)) && assert(cond))
 #   else
-#   define angie_verify(cond) ((void)(cond))
+#   define angie_verify(cond) ((cond))
 #   endif
 
 #endif

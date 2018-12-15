@@ -8,6 +8,7 @@
 #include "catch.hpp"
 
 #include "angie/core/system/system.hpp"
+#include "angie/core/system/report.hpp"
 
 #include <cstdio>
 

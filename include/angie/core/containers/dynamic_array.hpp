@@ -507,7 +507,10 @@ namespace angie {
 			 *
 			 * This function will clamp the number of replaced elements
 			 * between `num` and `dst.count`, will not resize the array.
-			 *
+			 * 
+			 * @note: Copy constructor, or assignment, won't be called here,
+			 * memory will be copied directly from the given object instead.
+			 * 		   
 			 * @tparam T POD type
 			 * @param dst Array to operate on
 			 * @param elem New element to overwrite with
@@ -523,7 +526,21 @@ namespace angie {
 
 				auto count = algorithm::min(from + num, dst.count);
 				while (from < count) {
-					dst.data[from++] = elem;
+					// We could use the assignment/copy contructor here.
+					// Although, if the given POD object includes some const
+					// member definition in it, the compiler will return an
+					// error because a default copy constructor will bot be 
+					// generated if not overwritten.
+					// Because one of the principle of this library is to
+					// remove as much as possible the common boilerplate code
+					// usually necessary for C++ type definition, we simply
+					// copy the memory.
+					//dst.data[from++] = elem;
+					if (!memory::copy(dst.data + from, &elem, sizeof(T))) {
+						return false;
+					}
+
+					++from;
 				}
 
 				return true;
@@ -629,6 +646,9 @@ namespace angie {
 			 * cannot operate on overlapping buffers, and this can be the case
 			 * for the type of operations required by the function, therefore
 			 * the algorithm used cannot take advantage of such manipulators.
+			 * 
+			 * @todo: Copy constructor, or assignment, won't be called here,
+			 * memory will be copied directly from the given object instead.
 			 *
 			 * @tparam T POD type
 			 * @param dst Array to operate on
@@ -872,6 +892,9 @@ namespace angie {
 
 			/**
 			 * Add one element at the end of the array.
+			 * 
+			 * @todo: Copy constructor, or assignment, won't be called here,
+			 * memory will be copied directly from the given object instead.
 			 *
 			 * @tparam T POD type
 			 * @param dst Source array to add the element to
@@ -896,12 +919,15 @@ namespace angie {
 			 * Remove one element from the end of the array.
 			 *
 			 * If the function fails, the given variable will be left untouched.
+			 * 
+			 * @todo: Copy constructor, or assignment, won't be called here,
+			 * memory will be copied directly from the given object instead.
 			 *
 			 * @tparam T POD type
 			 * @param dst Source array to add the element to
 			 * @param elem Variable that will hold the element removed
 			 * @return true if the element has been successfully removed to the
-			 *         array, false otherwise.
+			 * array, false otherwise.
 			 */
 			template <typename T>
 			inline types::boolean pop(dynamic_array<T>& dst, T& elem) {

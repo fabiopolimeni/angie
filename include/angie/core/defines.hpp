@@ -58,6 +58,7 @@
 #  define ANGIE_OS_CYGWIN
 #elif defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64)
 #  define ANGIE_OS_WIN64
+#  define ANGIE_OS_WIN
 #elif defined(__WIN32__) || defined(_WIN32) || defined(WIN32)
 #  define ANGIE_OS_WIN
 #elif defined(__linux) || defined(__linux__)
@@ -233,6 +234,22 @@
 #define ANGIE_PTR_SIZE 8
 #else
 #error Unsupported architecture
+#endif
+
+/**
+ * @def ANGIE_CPU_[X86,ARM,MIPS,PPC]
+ * @brief Give at compile time the CPU architecture
+ * @since 0.0.1
+ */
+#if (defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || defined(__x86_64__))
+#define ANGIE_CPU_x86
+#elif (defined(__arm__) || defined(_M_ARM)) || defined(CPU_FEATURES_ARCH_AARCH64))
+#define ANGIE_CPU_ARM
+#elif defined(__mips__)
+#define ANGIE_CPU_MIPS
+#endif
+#if defined(__powerpc__)
+#define ANGIE_CPU_PPC
 #endif
 
 /**

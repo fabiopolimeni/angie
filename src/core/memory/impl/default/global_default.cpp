@@ -8,7 +8,6 @@
 #include <cstdlib> // malloc/free
 #include <malloc.h>
 
-#include "../global_impl.hpp"
 #include "angie/core/utils.hpp"
 #include "angie/core/memory/manipulation.hpp"
 
@@ -121,28 +120,26 @@ namespace {
 namespace angie {
     namespace core {
         namespace memory {
-            namespace impl {
 
-                void* allocate(types::size size, types::size align) {
-                    return alloc_aligned(size, align);
-                }
-
-                void deallocate(void* ptr) {
-                    free_aligned(ptr);
-                }
-
-                void* reallocate(void* ptr, types::size sz, types::size al) {
-                    return realloc_aligned(ptr, sz, al);
-                }
-
-                void flush() {
-                }
-
-                types::size size_of(void* ptr) {
-                    return memory_size(ptr);
-                }
-
+            void* allocate(types::size size, types::size align) {
+                return alloc_aligned(size, align);
             }
+
+            void deallocate(void* ptr) {
+                free_aligned(ptr);
+            }
+
+            void* reallocate(void* ptr, types::size sz, types::size al) {
+                return realloc_aligned(ptr, sz, al);
+            }
+
+            void flush() {
+            }
+
+            types::size size_of(void* ptr) {
+                return memory_size(ptr);
+            }
+
         }
     }
 }

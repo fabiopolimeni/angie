@@ -4,10 +4,8 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include <cstring> // memmove
-
-#include "../global_impl.hpp"
 #include "angie/core/utils.hpp"
+#include "angie/core/memory/manipulation.hpp"
 
 // Because of some incoherent use of extern "C",
 // and the way the compiler decides to generate
@@ -29,66 +27,64 @@
 namespace angie {
     namespace core {
         namespace memory {
-            namespace impl {
 
-                void* allocate(types::size sz, types::size al) {
-                    // Always guarantee a minimum alignment
-                    // as big as the size of a pointer
-                    if (al < sizeof(types::uintptr))
-                        al = sizeof(types::uintptr);
+            void* allocate(types::size sz, types::size al) {
+                // Always guarantee a minimum alignment
+                // as big as the size of a pointer
+                if (al < sizeof(types::uintptr))
+                    al = sizeof(types::uintptr);
 
-                    return ltmemalign(al, sz);
+                return ltmemalign(al, sz);
+            }
+
+            void deallocate(void* ptr) {
+                ltfree(ptr);
+            }
+
+            void* reallocate(void* ptr, types::size sz, types::size al) {
+                // Handle special cases
+                if (!ptr) return ltmemalign(sz, al);
+                if (!sz) return ltfree(ptr), nullptr;
+
+                // If pointer and size are valid, then, check
+                // the current state of the given pointer, and
+                // if the new size and alignment
+                const size_t osz = ltmsize(ptr);
+                const size_t oal = utils::alignment_of((uintptr_t) ptr);
+                if (sz <= osz) {
+                    if (oal >= al) {
+                        return ptr;
+                    }
                 }
 
-                void deallocate(void* ptr) {
+                const size_t nal = (oal < al) ? al : oal;
+                void* nptr = ltmemalign(sz, nal);
+
+                // memory move can't cope with null pointers,
+                // and it would be an undefined behaviour in
+                // release mode, or would result into an assert
+                // in debug. Therefore, we need to intercept an
+                // eventual memory allocation failure, while
+                // returning and invalid null pointer.
+                if (nptr) {
+                    if (!memory::move(nptr, ptr, osz)) {
+                        ltfree(nptr);
+                    }
+
                     ltfree(ptr);
                 }
 
-                void* reallocate(void* ptr, types::size sz, types::size al) {
-                    // Handle special cases
-                    if (!ptr) return ltmemalign(sz, al);
-                    if (!sz) return ltfree(ptr), nullptr;
-
-                    // If pointer and size are valid, then, check
-                    // the current state of the given pointer, and
-                    // if the new size and alignment
-                    const size_t osz = ltmsize(ptr);
-                    const size_t oal = utils::alignment_of((uintptr_t) ptr);
-                    if (sz <= osz) {
-                        if (oal >= al) {
-                            return ptr;
-                        }
-                    }
-
-                    const size_t nal = (oal < al) ? al : oal;
-                    void* nptr = ltmemalign(sz, nal);
-
-                    // memory move can't cope with null pointers,
-                    // and it would be an undefined behaviour in
-                    // release mode, or would result into an assert
-                    // in debug. Therefore, we need to intercept an
-                    // eventual memory allocation failure, while
-                    // returning and invalid null pointer.
-                    if (nptr) {
-                        if (!memmove(nptr, ptr, osz)) {
-                            ltfree(nptr);
-                        }
-
-                        ltfree(ptr);
-                    }
-
-                    return nptr;
-                }
-
-                void flush() {
-                    ltsqueeze(0);
-                }
-
-                types::size size_of(void* ptr) {
-                    return ltmsize(ptr);
-                }
-
+                return nptr;
             }
+
+            void flush() {
+                ltsqueeze(0);
+            }
+
+            types::size size_of(void* ptr) {
+                return ltmsize(ptr);
+            }
+
         }
     }
 }

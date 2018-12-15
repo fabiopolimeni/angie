@@ -6,7 +6,6 @@
 
 #include "angie/core/system/system.hpp"
 #include "angie/core/memory/global.hpp"
-#include "../system_impl.hpp"
 #include "plibsys.h"
 
 extern "C" ppointer pmem_alloc (psize nbytes) {
@@ -24,25 +23,23 @@ extern "C" void pmem_free (ppointer block) {
 namespace angie {
     namespace core {
         namespace system {
-            namespace impl {
 
-                error init() {
+            error init() {
 
-                    PMemVTable vtable;
-                    vtable.free    = pmem_free;
-                    vtable.malloc  = pmem_alloc;
-                    vtable.realloc = pmem_realloc;
+                PMemVTable vtable;
+                vtable.free    = pmem_free;
+                vtable.malloc  = pmem_alloc;
+                vtable.realloc = pmem_realloc;
 
-                    p_libsys_init_full(&vtable);
+                p_libsys_init_full(&vtable);
 
-                    return error::ok;
-                }
-
-                void shutdown() {
-                    p_libsys_shutdown();
-                }
-
+                return error::ok;
             }
+
+            void shutdown() {
+                p_libsys_shutdown();
+            }
+
         }
     }
 }

@@ -16,7 +16,7 @@ namespace angie {
             /**
              * Some major cpu features identifiers
              */
-            enum class cpu_feature : uint16_t {
+            enum class x86_cpu_feature : uint8_t {
                 PSE,                /*!< Page size extension */
                 TSC,                /*!< Time-stamp counter */
                 CLFLUSH,            /*!< CLFLUSH instruction supported */
@@ -73,6 +73,46 @@ namespace angie {
                 COUNT
             };
 
+            enum class arm_cpu_feature : uint8_t {
+                VFP,                /* Vector Floating Point */
+                VFPV3,              /* VFP version 3 */
+                VFPV3D16,           /* VFP version 3 for double precision */
+                VFPV4,              /* VFP with fast context switching */
+                IDIVA,              /* DDIV and UDIV hardware divisions in ARM mode */
+                IDIVT,              /* DDIV and UDIV hardware divisions in Thumb mode */
+                NEON,               /* Advanced SIMD instructions */
+                AES,                /* Hardware accelerated Advanced Encryption Standards */
+                SHA1,               /* Hardware accelerated SHA1 */
+                SHA2,               /* Hardware accelerated SHA2-256 */
+                CRC32,              /* Hardware accelerated CRC32 */
+                PMULL,              /* Polynomial multiply long */
+
+                COUNT
+            };
+
+            enum class mips_cpu_feature : uint8_t {
+                MSA,                /* MIPS SIMD instructions */
+                EVA,                /* Enhanced Virtual Addressing */
+                XPA,                /* Extended Physical Address*/
+
+                COUNT
+            };
+
+            enum class not_supported_cpu_feature : uint8_t {
+                COUNT = 0
+            };
+
+            #if defined(ANGIE_CPU_x86)
+            using cpu_feature = x86_cpu_feature;
+            #elif defined(ANGIE_CPU_ARM)
+            using cpu_feature = arm_cpu_feature;
+            #elif defined(ANGIE_CPU_MIPS)
+            using cpu_feature = mips_cpu_feature;
+            #else
+            #error Not supported CPU
+            using cpu_feature = not_supported_cpu_feature;
+            #endif
+
             /**
              * Typical cache level identifiers
              */
@@ -102,8 +142,8 @@ namespace angie {
                 const types::uint32     physical_cores;
                 const types::uint32     logical_processors;
                 const types::size       cache_sizes[static_cast<uint8_t>(cpu_cache::COUNT)];
-                const types::size       cache_lines[static_cast<uint8_t>(cpu_cache::COUNT)];
-                const types::boolean    features[static_cast<uint16_t>(cpu_feature::COUNT)];
+                const types::size       cache_lines[static_cast<uint8_t>(cpu_cache::COUNT)];   
+                const types::boolean    features[static_cast<uint8_t>(cpu_feature::COUNT)];
             };
 
             /**
@@ -118,7 +158,7 @@ namespace angie {
              * @return true if query CPU info is supported on the current
 			 *         system, false otherwise.
              */
-            types::boolean query_cpu_info(containers::dynamic_array<cpu_info*>& cpus);
+            types::boolean query_cpu_info(containers::dynamic_array<cpu_info>& cpus);
 
 			/**
 			 * Return the current CPU the calling thread is running on.

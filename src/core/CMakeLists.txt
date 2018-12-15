@@ -24,19 +24,15 @@ set(INTERFACE_FILES
 	${ANGIE_INCLUDE_DIR}/angie/core/containers/common.hpp
 	${ANGIE_INCLUDE_DIR}/angie/core/containers/dynamic_array.hpp
 	${ANGIE_INCLUDE_DIR}/angie/core/system/system.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/system/report.hpp
 	${ANGIE_INCLUDE_DIR}/angie/core/system/cpu.hpp)
 
-set(SOURCE_FILES
-	memory/global.cpp
+set(COMPILATION_FILES
+	memory/operators.cpp
 	memory/manipulation.cpp
 	memory/allocator.cpp
-	system/system.cpp
-	system/cpu.cpp)
-
-set(IMPLEMENTATION_FILES
-	memory/impl/global_impl.hpp
-	system/impl/system_impl.hpp
-	system/impl/cpu_impl.hpp)
+	system/report.cpp
+)
 
 # Debug
 set(SOURCE_DEBUG_FILES "")
@@ -104,7 +100,7 @@ endif()
 set(SOURCE_SYSTEM_FILES "")
 if (angie_system_plibsys)
     list(APPEND SOURCE_SYSTEM_FILES
-            system/impl/plibsys/system_plibsys.cpp)
+        system/impl/plibsys/system_plibsys.cpp)
 
     set(PLIBSYS_DIR ../../externals/plibsys)
     option(PLIBSYS_TESTS "" OFF)
@@ -119,7 +115,12 @@ if (angie_system_plibsys)
     include_directories(${PLIBSYS_DIR}/src ${CMAKE_BINARY_DIR})
     target_link_libraries(angie_core plibsysstatic)
 
-    message(STATUS "System: plibsys")
+	message(STATUS "System: plibsys")
+else()
+	list(APPEND SOURCE_SYSTEM_FILES 
+		system/impl/default/system_default.cpp)
+
+	message(STATUS "System: default")
 endif()
 
 # CPU - 
@@ -129,15 +130,17 @@ if (angie_cpu_libcpuid)
 
     set(LIBCPUID_DIR ../../externals/libcpuid)
 	include_directories(${LIBCPUID_DIR}/libcpuid ${CMAKE_BINARY_DIR})
-	message(STATUS "CPU: libcpuid")
+	message(STATUS "CPU info: libcpuid")
+else()
+	list(APPEND SOURCE_CPU_FILES system/impl/default/cpu_default.cpp)
+	message(STATUS "CPU info: default")
 endif()
 
 
 # Add source files
 target_sources(angie_core PUBLIC ${HEADER_FILES})
 target_sources(angie_core PUBLIC ${INTERFACE_FILES})
-target_sources(angie_core PRIVATE ${SOURCE_FILES})
-target_sources(angie_core PRIVATE ${IMPLEMENTATION_FILES})
+target_sources(angie_core PRIVATE ${COMPILATION_FILES})
 
 target_sources(angie_core PRIVATE ${SOURCE_DEBUG_FILES})
 target_sources(angie_core PRIVATE ${SOURCE_MEMORY_FILES})

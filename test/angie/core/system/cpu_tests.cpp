@@ -15,7 +15,7 @@ TEST_CASE("CPU tests", "[cpu]")
 	using namespace angie::core::system;
 
 	SECTION("CPU query info") {
-		containers::dynamic_array<cpu_info*> cpu_infos = { 
+		containers::dynamic_array<cpu_info> cpu_infos = { 
 			nullptr, 0, 0
 		 };
 		 
