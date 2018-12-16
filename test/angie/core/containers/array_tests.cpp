@@ -191,18 +191,21 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 			u32_a.data[i] = i;
 		}
 
-		// [0,1,2,5,6]
+		// [0,1,4,5,6]
 		REQUIRE(containers::remove(u32_a, 2, 2));
 		REQUIRE(u32_a.count == 5);
 		REQUIRE(u32_a.capacity == 8);
+		REQUIRE(u32_a.data[0] == 0u);
+		REQUIRE(u32_a.data[1] == 1u);
+		REQUIRE(u32_a.data[2] == 4u);
 		REQUIRE(u32_a.data[3] == 5u);
 		REQUIRE(u32_a.data[4] == 6u);
 
-		// [0,1,2]
+		// [0,1,4]
 		REQUIRE(containers::remove(u32_a, 3, 3));
 		REQUIRE(u32_a.count == 3);
 
-		// [1,2]
+		// [1,4]
 		REQUIRE(containers::remove(u32_a, 0, 1));
 		REQUIRE(u32_a.count == 2);
 		REQUIRE(u32_a.capacity == 8);

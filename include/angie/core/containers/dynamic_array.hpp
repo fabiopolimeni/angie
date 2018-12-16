@@ -647,7 +647,7 @@ namespace angie {
 			 * for the type of operations required by the function, therefore
 			 * the algorithm used cannot take advantage of such manipulators.
 			 * 
-			 * @todo: Copy constructor, or assignment, won't be called here,
+			 * @note: Copy constructor, or assignment, won't be called here,
 			 * memory will be copied directly from the given object instead.
 			 *
 			 * @tparam T POD type
@@ -667,7 +667,14 @@ namespace angie {
 				// Overwrite one element at a time
 				auto remove_from = from + n_to_remove;
 				while (remove_from < dst.count) {
-					dst.data[remove_from - n_to_remove] = dst.data[remove_from];
+
+					//dst.data[remove_from - n_to_remove] = dst.data[remove_from];
+					if (!memory::copy(dst.data + remove_from - n_to_remove,
+						dst.data + remove_from, sizeof(T))) {	
+						dst.count -= remove_from - (from + n_to_remove);
+						return false;
+					}
+
 					++remove_from;
 				}
 
@@ -893,7 +900,7 @@ namespace angie {
 			/**
 			 * Add one element at the end of the array.
 			 * 
-			 * @todo: Copy constructor, or assignment, won't be called here,
+			 * @note: Copy constructor, or assignment, won't be called here,
 			 * memory will be copied directly from the given object instead.
 			 *
 			 * @tparam T POD type
@@ -908,7 +915,11 @@ namespace angie {
 
 				const auto count = get_count(dst);
 				if (resize(dst, count + 1)) {
-					at(dst, count) = elem;
+					
+					if (!memory::copy(dst.data + count, &elem, sizeof(T))) {
+						return false;
+					}
+					
 					return true;
 				}
 
@@ -920,7 +931,7 @@ namespace angie {
 			 *
 			 * If the function fails, the given variable will be left untouched.
 			 * 
-			 * @todo: Copy constructor, or assignment, won't be called here,
+			 * @note: Copy constructor, or assignment, won't be called here,
 			 * memory will be copied directly from the given object instead.
 			 *
 			 * @tparam T POD type
@@ -934,7 +945,12 @@ namespace angie {
 				angie_assert(is_valid(dst));
 
 				if (const auto count = get_count(dst) > 0) {
-					elem = at(dst, count - 1);
+					
+					//elem = at(dst, count - 1);
+					if (!memory::copy(&elem, dst.data + count - 1, sizeof(T))) {
+						return false;
+					}
+
 					--dst.count;
 					return true;
 				}

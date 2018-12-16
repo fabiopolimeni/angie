@@ -12,18 +12,18 @@ namespace angie {
 		namespace system {
 
 			types::boolean query_cpu_info(containers::dynamic_array<cpu_info>& cpus) {
-				// Assume we have only one CPU, no big.LITTLE or NUMA detection
-				// cpu_info cpu = {
-				// 	"Unknown default CPU",		// Name
-				// 	0,							// Id
-				// 	1, 							// Cores
-				// 	2,							// Logical Processors
-				// 	{64000},					// Cache size
-				// 	{256},						// Cache line size
-				// 	{false}						// CPU features
-				// };
+				// Assume we have only one CPU, no big.LITTLE DynamicIQ or NUMA detection
+				cpu_info cpu = {
+					"Unknown CPU",				// Name
+					0,							// Id
+					1, 							// Cores
+					2,							// Logical Processors
+					{64000},					// Cache size
+					{256},						// Cache line size
+					{false}						// CPU features
+				};
 
-				// containers::push(cpus, cpu);
+				containers::push(cpus, cpu);
 				return true;
 			}
 
