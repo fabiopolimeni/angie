@@ -20,9 +20,19 @@ TEST_CASE("CPU tests", "[cpu]")
 		 };
 		 
 		REQUIRE(system::query_cpu_info(cpu_infos));
+		REQUIRE(containers::get_count(cpu_infos) > 0);
+
+		auto cpu_info = containers::at(cpu_infos, 0);
+		REQUIRE(cpu_info.physical_cores >= 1);
+		REQUIRE(cpu_info.logical_processors >= 1);
 	}
 
 	SECTION("CPU current id") {
-		REQUIRE(system::get_current_cpu_id() != invalid_index);
+		auto cpu_id = invalid_index;
+		auto core_id = invalid_index;
+
+		REQUIRE(system::get_current_cpu_core(cpu_id, core_id));
+		REQUIRE(cpu_id != invalid_index);
+		REQUIRE(core_id != invalid_index);
 	}
 }

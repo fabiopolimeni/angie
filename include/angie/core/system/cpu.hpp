@@ -13,6 +13,8 @@ namespace angie {
     namespace core {
         namespace system {
 
+            using namespace containers;
+
             /**
              * Some major cpu features identifiers
              */
@@ -114,15 +116,30 @@ namespace angie {
             #endif
 
             /**
-             * Typical cache level identifiers
+             * CPU cache usage type
              */
-            enum class cpu_cache : uint8_t {
-                L1,
-                L2,
-                L3,
-                L4,
+            enum class cache_usage {
+                INSTRUCTION,
+                DATA
+            };
 
-                COUNT
+            /**
+             * CPU cache access type
+             */
+            enum class cache_access {
+                DEDICATED,
+                SHARED
+            };
+
+            /*
+             * CPU cache descriptor
+             */
+            struct cpu_cache {
+                types::uint8    level;
+                types::size     total_size;
+                types::size     line_size;
+                cache_usage     usage;
+                cache_access    access;
             };
 
             /**
@@ -137,13 +154,12 @@ namespace angie {
 			 * @param features CPU capable features
              */
             struct cpu_info {
-                const types::char8*     name;
-                const types::index		id;
-                const types::uint32     physical_cores;
-                const types::uint32     logical_processors;
-                const types::size       cache_sizes[static_cast<uint8_t>(cpu_cache::COUNT)];
-                const types::size       cache_lines[static_cast<uint8_t>(cpu_cache::COUNT)];   
-                const types::boolean    features[static_cast<uint8_t>(cpu_feature::COUNT)];
+                const types::char8*                 name;
+                const types::index		            id;
+                const types::uint32                 physical_cores;
+                const types::uint32                 logical_processors;
+                const dynamic_array<cpu_cache>      caches;   
+                const dynamic_array<types::boolean> features;
             };
 
             /**
@@ -161,15 +177,15 @@ namespace angie {
             types::boolean query_cpu_info(containers::dynamic_array<cpu_info>& cpus);
 
 			/**
-			 * Return the current CPU the calling thread is running on.
+			 * Return the current core the calling thread is running on.
 			 * 
-			 * If a valid index is returned, this refers to the cpu stored
-			 * in the array returned by `query()` function, and the `id`
-			 * property of the `info` structure must match it.
+			 * If a valid cpu_id is returned, this refers to the cpu stored
+			 * in the array returned by `query_cpu_info()`, and the core_id
+			 * is the core this function is currently executed from.
 			 *
-			 * @return CPU id if valid, or `invalid_index` if fails.
+			 * @return true if a valid CPU and core are returned, false otherwise.
 			 */
-			types::index get_current_cpu_id();
+			types::boolean get_current_cpu_core(types::index& cpu, types::index &core);
 
         }
     }
