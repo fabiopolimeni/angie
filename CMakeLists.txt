@@ -89,12 +89,12 @@ endfunction (angie_detect_cpu_arch)
 # OS bits possible values 32|64
 set(ANGIE_OS_BITS "")
 angie_detect_os_arch(ANGIE_OS_BITS)
-message(STATUS "ANGIE_OS_BITS: " ${ANGIE_OS_BITS})
+message(STATUS "Platform bits: " ${ANGIE_OS_BITS})
 
 # CPU architecture possible values x86|x64|ARM|ARM64
 set(ANGIE_CPU_ARCH "")
 angie_detect_cpu_arch(ANGIE_CPU_ARCH)
-message(STATUS "ANGIE_CPU_ARCH: " ${ANGIE_CPU_ARCH})
+message(STATUS "Target CPU: " ${ANGIE_CPU_ARCH})
 
 # Add lib core directory
 add_subdirectory(src/core)
