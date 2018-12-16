@@ -27,6 +27,8 @@ option(angie_memory_global_ltalloc "Use ltalloc for global memory" ON)
 option(angie_system_plibsys "Use plibsys as base system library" OFF)
 option(angie_debug_tools "Use programmatic debug tools" ON)
 option(angie_cpu_libcpuid "Use libcpuid to detect cpu info" OFF)
+option(angie_cpu_google_features "Use cpu_features to detect cpu info" OFF)
+option(angie_cpu_pytroch_cpuinfo "User cpuinfo to detect cpu info" ON)
 
 # Profile configuration
 if (angie_config_profile)

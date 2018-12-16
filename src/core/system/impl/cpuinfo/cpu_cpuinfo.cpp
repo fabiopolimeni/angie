@@ -4,6 +4,7 @@
 
 #include "angie/core/system/cpu.hpp"
 #include "angie/core/containers/dynamic_array.hpp"
+#include "cpuinfo.h"
 
 namespace angie {
 	namespace core {
@@ -11,24 +12,12 @@ namespace angie {
 
 			types::boolean query_cpu_info(
 				containers::dynamic_array<cpu_info>& cpus) {
-				// Assume we have only one CPU, no big.LITTLE,
-				// DynamicIQ or NUMA implementation.
-				cpu_info cpu = {
-					"Unknown CPU",				// Name
-					0,							// Id
-					1, 							// Cores
-					2							// Logical Processors
-				};
-
-				containers::push(cpus, cpu);
-				return true;
+				return false;
 			}
 
 			types::boolean get_current_cpu_core(
 				types::index& cpu, types::index& core) {
-				cpu = 0;
-				core = 0;
-				return true;
+				return false;
 			}
 		}
 	}

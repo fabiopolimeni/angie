@@ -105,7 +105,8 @@ if (angie_system_plibsys)
     set(PLIBSYS_DIR ../../externals/plibsys)
     option(PLIBSYS_TESTS "" OFF)
     option(PLIBSYS_TESTS_STATIC "" OFF)
-    option(PLIBSYS_BUILD_STATIC "" ON)
+	option(PLIBSYS_BUILD_STATIC "" ON)
+	option(PLIBSYS_BUILD_DOC "" OFF)
     add_subdirectory(${PLIBSYS_DIR} plibsys EXCLUDE_FROM_ALL)
     #include(${PLIBSYS_DIR}/CMakeLists.txt)
 
@@ -123,7 +124,7 @@ else()
 	message(STATUS "System: default")
 endif()
 
-# CPU - 
+# CPU info detection
 set(SOURCE_CPU_FILES "")
 if (angie_cpu_libcpuid)
 	list(APPEND SOURCE_CPU_FILES system/impl/libcpuid/cpu_libcpuid.cpp)
@@ -131,6 +132,26 @@ if (angie_cpu_libcpuid)
     set(LIBCPUID_DIR ../../externals/libcpuid)
 	include_directories(${LIBCPUID_DIR}/libcpuid ${CMAKE_BINARY_DIR})
 	message(STATUS "CPU info: libcpuid")
+elseif(angie_cpu_google_features)
+	list(APPEND SOURCE_CPU_FILES system/impl/cpu_features/cpu_features.cpp)
+	
+    set(CPU_FEATURES_DIR ../../externals/cpu_features)
+	add_subdirectory(${CPU_FEATURES_DIR} cpu_features EXCLUDE_FROM_ALL)
+	
+	target_link_libraries(angie_core cpu_features)
+	message(STATUS "CPU info: Google cpu_features")
+elseif(angie_cpu_pytroch_cpuinfo)
+	list(APPEND SOURCE_CPU_FILES system/impl/cpuinfo/cpu_cpuinfo.cpp)
+	
+	set(CPUINFO_DIR ../../externals/cpuinfo)
+	
+	option(CPUINFO_BUILD_UNIT_TESTS "Build cpuinfo unit tests" OFF)
+	option(CPUINFO_BUILD_MOCK_TESTS "Build cpuinfo mock tests" OFF)
+	option(CPUINFO_BUILD_BENCHMARKS "Build cpuinfo micro-benchmarks" OFF)
+	add_subdirectory(${CPUINFO_DIR} cpuinfo EXCLUDE_FROM_ALL)
+	
+	target_link_libraries(angie_core cpuinfo)
+	message(STATUS "CPU info: Pytorch cpuinfo")
 else()
 	list(APPEND SOURCE_CPU_FILES system/impl/default/cpu_default.cpp)
 	message(STATUS "CPU info: default")

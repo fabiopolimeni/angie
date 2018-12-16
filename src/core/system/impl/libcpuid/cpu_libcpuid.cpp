@@ -11,12 +11,14 @@ namespace angie {
 	namespace core {
 		namespace system {
 
-			types::boolean query_cpu_info(containers::dynamic_array<cpu_info>& cpus) {
+			types::boolean query_cpu_info(
+				containers::dynamic_array<cpu_info>& cpus) {
 				return false;
 			}
 
-			types::index get_current_cpu_id() {
-				return core::invalid_index;
+			types::boolean get_current_cpu_core(
+				types::index& cpu, types::index& core) {
+				return false;
 			}
 		}
 	}
