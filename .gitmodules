@@ -20,3 +20,6 @@
 	path = tools/emsdk
 	url = https://github.com/juj/emsdk.git
 	ignore = dirty
+[submodule "externals/cpu_features"]
+	path = externals/cpu_features
+	url = https://github.com/google/cpu_features.git
