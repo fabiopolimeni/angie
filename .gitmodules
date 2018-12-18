@@ -23,6 +23,8 @@
 [submodule "externals/cpu_features"]
 	path = externals/cpu_features
 	url = https://github.com/google/cpu_features.git
+	ignore = dirty
 [submodule "externals/cpuinfo"]
 	path = externals/cpuinfo
 	url = https://github.com/pytorch/cpuinfo.git
+	ignore = dirty
