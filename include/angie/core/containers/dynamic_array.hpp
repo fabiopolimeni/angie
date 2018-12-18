@@ -95,6 +95,14 @@ namespace angie {
 				types::size                 count;
 				types::size					capacity;
 				const memory::allocator&    allocator =  memory::get_default_allocator();
+
+				T& operator[](types::size idx) {
+					return data[idx];
+				}
+
+    			const T& operator[](types::size idx) const {
+					return data[idx];
+				}
 			};
 
 			/**

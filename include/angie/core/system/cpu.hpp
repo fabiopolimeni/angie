@@ -16,7 +16,8 @@ namespace angie {
             /**
              * Some major cpu features identifiers
              */
-            enum class x86_cpu_feature : uint8_t {
+        #if defined(ANGIE_CPU_x86)
+            enum x86_cpu_feature : uint8_t {
                 PSE,                /*!< Page size extension */
                 TSC,                /*!< Time-stamp counter */
                 CLFLUSH,            /*!< CLFLUSH instruction supported */
@@ -70,10 +71,14 @@ namespace angie {
                 SHA_NI,             /*!< SHA-1/SHA-256 instructions */
                 SGX,                /*!< SGX extensions */
 
+                CX8,                /*!< CMPXCHG8B supported */
+                RDTSC,              /*!< RDTCS instruction present */
+
                 COUNT
             };
-
-            enum class arm_cpu_feature : uint8_t {
+            using cpu_feature = x86_cpu_feature;
+        #elif defined(ANGIE_CPU_ARM)
+            enum arm_cpu_feature : uint8_t {
                 VFP,                /* Vector Floating Point */
                 VFPV3,              /* VFP version 3 */
                 VFPV3D16,           /* VFP version 3 for double precision */
@@ -89,29 +94,42 @@ namespace angie {
 
                 COUNT
             };
-
-            enum class mips_cpu_feature : uint8_t {
+            using cpu_feature = arm_cpu_feature;
+        #elif defined(ANGIE_CPU_MIPS)
+            enum mips_cpu_feature : uint8_t {
                 MSA,                /* MIPS SIMD instructions */
                 EVA,                /* Enhanced Virtual Addressing */
                 XPA,                /* Extended Physical Address*/
 
                 COUNT
             };
+            using cpu_feature = mips_cpu_feature;
+        #elif defined(ANGIE_CPU_PPC)
+            enum ppc_cpu_feature : uint8_t {
+                PPC32,
+                PPC64,
+                ALTIVEC,
+                FPU,
+                MMU,
+                UNIFIED_CACHE,
+                CELL,
+                SMT,
+                DFP,
+                VSX,
+                VCRYPTO,
+                IEEE128,
+                DARN,
+                SCV
 
-            enum class not_supported_cpu_feature : uint8_t {
+                COUNT
+            };
+            using cpu_feature = ppc_cpu_feature;
+        #else
+            enum not_supported_cpu_feature : uint8_t {
                 COUNT = 0
             };
-
-            #if defined(ANGIE_CPU_x86)
-            using cpu_feature = x86_cpu_feature;
-            #elif defined(ANGIE_CPU_ARM)
-            using cpu_feature = arm_cpu_feature;
-            #elif defined(ANGIE_CPU_MIPS)
-            using cpu_feature = mips_cpu_feature;
-            #else
-            #error Not supported CPU
             using cpu_feature = not_supported_cpu_feature;
-            #endif
+        #endif
 
             /**
              * CPU cache usage type
@@ -133,11 +151,11 @@ namespace angie {
              * CPU cache descriptor
              */
             struct cpu_cache {
-                types::uint8    level;
-                types::size     total_size;
-                types::size     line_size;
-                cache_usage     usage;
-                cache_access    access;
+                const types::uint8    level;
+                const types::size     total_size;
+                const types::size     line_size;
+                const cache_usage     usage;
+                const cache_access    access;
             };
 
             /**
@@ -152,11 +170,12 @@ namespace angie {
 			 * @param features CPU capable features
              */
             struct cpu_info {
-                const types::char8*                 name;
                 const types::index		            id;
+                const types::char8*                 vendor;
+                const types::char8*                 architecture;
                 const types::uint32                 physical_cores;
                 const types::uint32                 logical_processors;
-                const dynamic_array<cpu_cache>      caches;   
+                const dynamic_array<cpu_cache>      data_caches;   
                 const dynamic_array<types::boolean> features;
             };
 

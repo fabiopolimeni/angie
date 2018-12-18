@@ -14,8 +14,9 @@ namespace angie {
 				// Assume we have only one CPU, no big.LITTLE,
 				// DynamicIQ or NUMA implementation.
 				cpu_info cpu = {
-					"Unknown CPU",				// Name
 					0,							// Id
+					"Vendor unknown",			// Vendor
+					"Arch unknown",				// Architecture
 					1, 							// Cores
 					2							// Logical Processors
 				};

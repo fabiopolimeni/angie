@@ -237,7 +237,7 @@
 #endif
 
 /**
- * @def ANGIE_CPU_[X86,ARM,MIPS,PPC]
+ * @def ANGIE_CPU_[x86,ARM,MIPS,PPC]
  * @brief Give at compile time the CPU architecture
  * @since 0.0.1
  */
