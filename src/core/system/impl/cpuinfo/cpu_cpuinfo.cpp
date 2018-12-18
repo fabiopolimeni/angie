@@ -31,12 +31,8 @@ namespace {
 	}
 
 #if defined(ANGIE_CPU_x86)
-	void cpuinfo_get_features(dynamic_array<boolean>& features) {
-		angie::core::containers::init(features, x86_cpu_feature::COUNT);
-		angie::core::containers::resize(features, x86_cpu_feature::COUNT);
-
-		features[cpu_feature::ABM] 			= cpuinfo_has_x86_lzcnt()
-												&& cpuinfo_has_x86_popcnt();
+	void cpuinfo_load_features(dynamic_array<boolean>& features) {
+		features[cpu_feature::ABM] 			= cpuinfo_has_x86_lzcnt() && cpuinfo_has_x86_popcnt();
 		features[cpu_feature::AES] 			= cpuinfo_has_x86_aes();
 		features[cpu_feature::SHA_NI] 		= cpuinfo_has_x86_sha();
 		features[cpu_feature::RDRAND] 		= cpuinfo_has_x86_rdrand();
@@ -67,16 +63,33 @@ namespace {
 		features[cpu_feature::AVX512VL] 	= cpuinfo_has_x86_avx512vl();
 	}
 #elif defined(ANGIE_CPU_ARM)
-	void cpuinfo_get_features(dynamic_array<boolean>& features) {
-		// @todo:...
-	}
-#elif defined(ANGIE_CPU_MIPS)
-	void cpuinfo_get_features(dynamic_array<boolean>& features) {
-		// @todo:...
-	}
-#elif defined(ANGIE_CPU_PPC)
-	void cpuinfo_get_features(dynamic_array<boolean>& features) {
-		// @todo:...
+	void cpuinfo_load_features(dynamic_array<boolean>& features) {
+		features[cpu_feature::AES]				= cpuinfo_has_arm_aes();
+		features[cpu_feature::ATOMICS]			= cpuinfo_has_arm_atomics();
+		features[cpu_feature::CRC32]			= cpuinfo_has_arm_crc32();
+		features[cpu_feature::FCMA]				= cpuinfo_has_arm_fcma();
+		features[cpu_feature::FP16_ARITH]		= cpuinfo_has_arm_fp16_arith();
+		features[cpu_feature::JSCVT]			= cpuinfo_has_arm_jscvt();
+		features[cpu_feature::IDIV]				= cpuinfo_has_arm_idiv();
+		features[cpu_feature::NEON]				= cpuinfo_has_arm_neon();
+		features[cpu_feature::NEON_FMA]			= cpuinfo_has_arm_neon_fma();
+		features[cpu_feature::NEON_FP16]		= cpuinfo_has_arm_neon_fp16();
+		features[cpu_feature::NEON_FP16_ARITH]	= cpuinfo_has_arm_neon_fp16_arith();
+		features[cpu_feature::NEON_RDM]			= cpuinfo_has_arm_neon_rdm();
+		features[cpu_feature::PMULL]			= cpuinfo_has_arm_pmull();
+		features[cpu_feature::SHA1]				= cpuinfo_has_arm_sha1();
+		features[cpu_feature::SHA2]				= cpuinfo_has_arm_sha2();
+		features[cpu_feature::THUMB]			= cpuinfo_has_arm_thumb();
+		features[cpu_feature::THUMB2]			= cpuinfo_has_arm_thumb2();
+		features[cpu_feature::VFPV2]			= cpuinfo_has_arm_vfpv2();
+		features[cpu_feature::VFPV3]			= cpuinfo_has_arm_vfpv3();
+		features[cpu_feature::VFPV3_D32]		= cpuinfo_has_arm_vfpv3_d32();
+		features[cpu_feature::VFPV3_FP16]		= cpuinfo_has_arm_vfpv3_fp16();
+		features[cpu_feature::VFPV3_FP16_D32]	= cpuinfo_has_arm_vfpv3_fp16_d32();
+		features[cpu_feature::VFPV4]			= cpuinfo_has_arm_vfpv4();
+		features[cpu_feature::VFPV4_D32]		= cpuinfo_has_arm_vfpv4_d32();
+		features[cpu_feature::WMMX]				= cpuinfo_has_arm_wmmx();
+		features[cpu_feature::WMMX2]			= cpuinfo_has_arm_wmmx2();
 	}
 #else
 #	error "CPU features not supported for the given architecture"
@@ -148,7 +161,10 @@ namespace angie {
 
 						// Features identification
 						dynamic_array<types::boolean> features;
-						cpuinfo_get_features(features);
+						containers::init(features, cpu_feature::COUNT);
+						containers::resize(features, cpu_feature::COUNT);
+						containers::set(features, false, 0, cpu_feature::COUNT);
+						cpuinfo_load_features(features);
 
 						// Add the cpu to the list
 						containers::push(cpus, {
@@ -168,9 +184,15 @@ namespace angie {
 				return false;
 			}
 
-			types::boolean get_current_cpu_core(
-				types::index& cpu, types::index& core) {
-				return false;
+			types::boolean get_current_core(types::index& core_id) {
+				// const auto* core = cpuinfo_get_current_core();
+				// if (!core) {
+				// 	return false;
+				// }
+
+				// core_id = core->core_id;
+				core_id = 0;
+				return true;
 			}
 		}
 	}

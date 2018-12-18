@@ -79,18 +79,32 @@ namespace angie {
             using cpu_feature = x86_cpu_feature;
         #elif defined(ANGIE_CPU_ARM)
             enum arm_cpu_feature : uint8_t {
-                VFP,                /* Vector Floating Point */
-                VFPV3,              /* VFP version 3 */
-                VFPV3D16,           /* VFP version 3 for double precision */
-                VFPV4,              /* VFP with fast context switching */
-                IDIVA,              /* DDIV and UDIV hardware divisions in ARM mode */
-                IDIVT,              /* DDIV and UDIV hardware divisions in Thumb mode */
-                NEON,               /* Advanced SIMD instructions */
-                AES,                /* Hardware accelerated Advanced Encryption Standards */
-                SHA1,               /* Hardware accelerated SHA1 */
-                SHA2,               /* Hardware accelerated SHA2-256 */
-                CRC32,              /* Hardware accelerated CRC32 */
-                PMULL,              /* Polynomial multiply long */
+                AES,
+                ATOMICS,
+                CRC32,
+                FCMA,
+                FP16_ARITH,
+                JSCVT,
+                IDIV,
+                NEON,
+                NEON_FMA,
+                NEON_FP16,
+                NEON_FP16_ARITH,
+                NEON_RDM,
+                PMULL,
+                SHA1,
+                SHA2,
+                THUMB,
+                THUMB2,
+                VFPV2,
+                VFPV3,
+                VFPV3_D32,
+                VFPV3_FP16,
+                VFPV3_FP16_D32,
+                VFPV4,
+                VFPV4_D32,
+                WMMX,
+                WMMX2,
 
                 COUNT
             };
@@ -194,15 +208,15 @@ namespace angie {
             types::boolean query_cpu_info(containers::dynamic_array<cpu_info>& cpus);
 
 			/**
-			 * Return the current core the calling thread is running on.
+			 * Return the current core id the calling thread is running on.
 			 * 
-			 * If a valid cpu_id is returned, this refers to the cpu stored
+			 * If a valid core_id is returned, this refers to the cpu stored
 			 * in the array returned by `query_cpu_info()`, and the core_id
 			 * is the core this function is currently executed from.
 			 *
 			 * @return true if a valid CPU and core are returned, false otherwise.
 			 */
-			types::boolean get_current_cpu_core(types::index& cpu, types::index &core);
+			types::boolean get_current_core(types::index& core_id);
 
         }
     }

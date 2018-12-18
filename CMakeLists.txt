@@ -29,6 +29,7 @@ option(angie_debug_tools "Use programmatic debug tools" ON)
 option(angie_cpu_libcpuid "Use libcpuid to detect cpu info" OFF)
 option(angie_cpu_google_features "Use cpu_features to detect cpu info" OFF)
 option(angie_cpu_pytroch_cpuinfo "User cpuinfo to detect cpu info" ON)
+option(angie_build_tests "Build tests" ON)
 
 # Profile configuration
 if (angie_config_profile)
@@ -101,6 +102,8 @@ message(STATUS "Target CPU: " ${ANGIE_CPU_ARCH})
 # Add lib core directory
 add_subdirectory(src/core)
 
-# Add testing files
-include(CTest)
-add_subdirectory(test)
+if (angie_build_tests)
+	# Add testing files
+	include(CTest)
+	add_subdirectory(test)
+endif()

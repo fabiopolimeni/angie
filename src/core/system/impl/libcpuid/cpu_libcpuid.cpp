@@ -16,8 +16,7 @@ namespace angie {
 				return false;
 			}
 
-			types::boolean get_current_cpu_core(
-				types::index& cpu, types::index& core) {
+			types::boolean get_current_core(types::index& core_id) {
 				return false;
 			}
 		}

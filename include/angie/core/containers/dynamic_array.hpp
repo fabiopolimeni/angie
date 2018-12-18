@@ -91,10 +91,10 @@ namespace angie {
 			 */
 			template <typename T>
 			struct dynamic_array {
-				T* ANGIE_RESTRICT           data;
-				types::size                 count;
-				types::size					capacity;
-				const memory::allocator&    allocator =  memory::get_default_allocator();
+				T* ANGIE_RESTRICT           data		= nullptr;
+				types::size                 count		= 0;
+				types::size					capacity	= 0;
+				const memory::allocator&    allocator 	=  memory::get_default_allocator();
 
 				T& operator[](types::size idx) {
 					return data[idx];

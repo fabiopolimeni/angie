@@ -1,6 +1,4 @@
 // Copyright (c) 2017 Fabio Polimeni
-// Created on: 10/03/2017
-//
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
@@ -28,11 +26,9 @@ TEST_CASE("CPU tests", "[cpu]")
 	}
 
 	SECTION("CPU current id") {
-		auto cpu_id = invalid_index;
 		auto core_id = invalid_index;
 
-		REQUIRE(system::get_current_cpu_core(cpu_id, core_id));
-		REQUIRE(cpu_id != invalid_index);
+		REQUIRE(system::get_current_core(core_id));
 		REQUIRE(core_id != invalid_index);
 	}
 }
