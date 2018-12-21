@@ -6,6 +6,10 @@
 #include "angie/core/containers/dynamic_array.hpp"
 #include "cpuinfo.h"
 
+#if defined(ANGIE_OS_WIN)
+#include "cpu_cpuinfo_win.cpp"
+#endif
+
 namespace {
 	using namespace angie::core::system;
 	using namespace angie::core::types;
@@ -197,15 +201,17 @@ namespace angie {
 				containers::release(cpus);
 			}
 
-			types::boolean get_current_core(types::index& core_id) {
-				// const auto* core = cpuinfo_get_current_core();
-				// if (!core) {
-				// 	return false;
-				// }
+			types::index get_current_processor() {
+				#if defined(ANGIE_OS_WIN)
+				return win::get_current_processor();
+				#else
+				const auto* processor = cpuinfo_get_current_processor();
+				if (processor) {
+					return processor->smt_id;
+				}
+				#endif
 
-				// core_id = core->core_id;
-				core_id = 0;
-				return true;
+				return invalid_index;
 			}
 		}
 	}

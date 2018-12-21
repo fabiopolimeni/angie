@@ -18,8 +18,8 @@ namespace angie {
 				
 			}
 
-			types::boolean get_current_core(types::index& core_id) {
-				return false;
+			types::index get_current_processor(){
+				return invalid_index;
 			}
 		}
 	}

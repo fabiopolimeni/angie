@@ -28,9 +28,14 @@ TEST_CASE("CPU tests", "[cpu]")
 	}
 
 	SECTION("CPU current id") {
-		auto core_id = invalid_index;
+		containers::dynamic_array<cpu_info> cpus = { 
+			nullptr, 0, 0
+		};
 
-		REQUIRE(system::get_current_core(core_id));
+		REQUIRE(system::query_cpu_info(cpus));
+		auto core_id = system::get_current_processor();
 		REQUIRE(core_id != invalid_index);
+		
+		system::release_cpu_info(cpus);
 	}
 }

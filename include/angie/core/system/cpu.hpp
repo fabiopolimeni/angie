@@ -213,15 +213,11 @@ namespace angie {
             void release_cpu_info(containers::dynamic_array<cpu_info>& cpus);
 
 			/**
-			 * Return the current core id the calling thread is running on.
-			 * 
-			 * If a valid core_id is returned, this refers to the cpu stored
-			 * in the array returned by `query_cpu_info()`, and the core_id
-			 * is the core this function is currently executed from.
+			 * Return the current processor id the current thread is executing from.
 			 *
-			 * @return true if a valid CPU and core are returned, false otherwise.
+			 * @return Return the current logical processor id.
 			 */
-			types::boolean get_current_core(types::index& core_id);
+			types::index get_current_processor();
 
         }
     }
