@@ -64,7 +64,8 @@ extern "C" void atexit_callback() {
 			types::char8* string_ptr = string_buffer;
 			types::char8* string_end = string_ptr + string_buffer_size;
 
-			string_ptr += snprintf(string_ptr, string_end - string_ptr, "Callstack at exit\n");
+			string_ptr += snprintf(string_ptr, string_end - string_ptr,
+				"Callstack at exit\n");
 
 			// Resolve addresses to symbols
 			if (auto n_symbols = diagnostics::resolve_symbols(addresses, symbols,
