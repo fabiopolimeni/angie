@@ -9,6 +9,7 @@
 #include <malloc.h>
 
 #include "angie/core/utils.hpp"
+#include "angie/core/diagnostics/assert.hpp"
 #include "angie/core/memory/manipulation.hpp"
 
 namespace {
@@ -25,9 +26,9 @@ namespace {
     inline
     void * alloc_aligned(size_t sz, size_t al) {
         // Alignment must be a power of two.
-        if (al & (al - 1))
-            return nullptr;
-        else if (!sz)
+        angie_assert(angie::core::utils::is_power_of_two(al));
+
+        if (!sz)
             return nullptr;
 
         // We need extra bytes to store the
@@ -122,15 +123,17 @@ namespace angie {
         namespace memory {
 
             void* allocate(types::size size, types::size align) {
-                return alloc_aligned(size, align);
+                return alloc_aligned(size,
+                    utils::get_power_of_two(align));
             }
 
             void deallocate(void* ptr) {
                 free_aligned(ptr);
             }
 
-            void* reallocate(void* ptr, types::size sz, types::size al) {
-                return realloc_aligned(ptr, sz, al);
+            void* reallocate(void* ptr, types::size size, types::size align) {
+                return realloc_aligned(ptr, size,
+                    utils::get_power_of_two(align));
             }
 
             void flush() {

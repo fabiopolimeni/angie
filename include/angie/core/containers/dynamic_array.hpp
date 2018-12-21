@@ -68,7 +68,7 @@ namespace angie {
 			 */
 			template <typename T>
 			constexpr inline types::size get_type_alignment() {
-				return sizeof(T);
+				return utils::get_power_of_two(sizeof(T));
 			}
 
 			/**
@@ -94,7 +94,7 @@ namespace angie {
 				T* ANGIE_RESTRICT           data		= nullptr;
 				types::size                 count		= 0;
 				types::size					capacity	= 0;
-				const memory::allocator&    allocator 	=  memory::get_default_allocator();
+				const memory::allocator&    allocator 	= memory::get_default_allocator();
 
 				T& operator[](types::size idx) {
 					return data[idx];
@@ -325,6 +325,12 @@ namespace angie {
 					auto new_count = num + dst.count;
 					auto new_capacity = compute_capacity(new_count);
 
+					// Check whether the final capacity of the buffer is less
+					// than, or equal, to the current one. If so, return.
+					if (new_capacity <= get_capacity(dst)) {
+						return true;
+					}
+
 					auto new_data = static_cast<T*>(dst.allocator.realloc(
 						dst.data, compute_size<T>(new_capacity),
 						get_type_alignment<T>()));
@@ -481,20 +487,21 @@ namespace angie {
 
 				auto new_capacity = compute_capacity(new_size);
 
-				// Check whether the final capacity of the buffer would
-				// differ, if this is not the case, then, there is no need
-				// for reallocating memory.
-				if (new_capacity == get_capacity(dst)) {
+				// Check whether the final capacity of the buffer differs
+				// if this is not the case, then, there is no need to realloc.
+				if (new_capacity <= get_capacity(dst)) {
 					dst.count = new_size;
 					return true;
 				}
 
-				// If reach this point, the new capacity can either be
-				// less, or greater than the current one, in both cases
-				// we issue a `realloc`, although, memory will probably
-				// be truly reallocated only for the letter case.
+				// If we reach this point, the new capacity can either be
+				// less, or greater than the current one. In both cases
+				// we issue a `realloc`.
+				// @note: Memory will probably be truly reallocated only
+				// when the new items wouldn't fit into the current capacity.
 				auto* new_data = static_cast<T*>(dst.allocator.realloc(
-					dst.data, compute_size<T>(new_capacity), get_type_alignment<T>()));
+					dst.data, compute_size<T>(new_capacity),
+					get_type_alignment<T>()));
 
 				// Either both `capacity` and `data` are null,
 				// or both need to be valid.

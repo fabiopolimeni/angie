@@ -43,7 +43,7 @@ namespace angie {
 
             void* reallocate(void* ptr, types::size sz, types::size al) {
                 // Handle special cases
-                if (!ptr) return ltmemalign(sz, al);
+                if (!ptr) return ltmemalign(al, sz);
                 if (!sz) return ltfree(ptr), nullptr;
 
                 // If pointer and size are valid, then, check
@@ -58,7 +58,7 @@ namespace angie {
                 }
 
                 const size_t nal = (oal < al) ? al : oal;
-                void* nptr = ltmemalign(sz, nal);
+                void* nptr = ltmemalign(nal, sz);
 
                 // memory move can't cope with null pointers,
                 // and it would be an undefined behaviour in

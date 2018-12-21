@@ -60,6 +60,12 @@ namespace angie {
                 return types::size(1) << out_num;
             }
 
+            inline
+            types::size get_power_of_two(types::size v) {
+                return (is_power_of_two(v))
+                    ? v : next_power_of_two(v);
+            }
+
         }
     }
 }

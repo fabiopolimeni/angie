@@ -23,7 +23,7 @@ set(CPACK_PACKAGE_VERSION_BUILD ${BUILD_TIME})
 
 # Set of options
 option(angie_config_profile "Use profile configuration" OFF)
-option(angie_memory_global_ltalloc "Use ltalloc for global memory" ON)
+option(angie_memory_global_ltalloc "Use ltalloc for global memory" OFF)
 option(angie_system_plibsys "Use plibsys as base system library" OFF)
 option(angie_debug_tools "Use programmatic debug tools" ON)
 option(angie_cpu_libcpuid "Use libcpuid to detect cpu info" OFF)

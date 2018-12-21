@@ -175,18 +175,16 @@ namespace angie {
             /**
              * This structure holds the CPU information.
              *
-             * @param name CPU friendly name
 			 * @param id Identifies which CPU this refers to
+             * @param brand_name CPU friendly name
 			 * @param physical_cores Number of physical cores
-			 * @param logical_processors Number of logical CPUs (HT)
-			 * @param cache_sizes Data cache sizes per cache level
-			 * @param cache_lines Cache line sizes per cache level
+			 * @param logical_processors Number of logical processors (HT)
+			 * @param data_caches Caches information
 			 * @param features CPU capable features
              */
             struct cpu_info {
                 const types::index		            id;
-                const types::char8*                 vendor;
-                const types::char8*                 architecture;
+                const types::char8*                 brand_name;
                 const types::uint32                 physical_cores;
                 const types::uint32                 logical_processors;
                 const dynamic_array<cpu_cache>      data_caches;   
@@ -206,6 +204,13 @@ namespace angie {
 			 *         system, false otherwise.
              */
             types::boolean query_cpu_info(containers::dynamic_array<cpu_info>& cpus);
+
+            /**
+             * Release memory allocated to store cpu information.
+             * 
+             * @param cpus Array containing system cpu information
+             */
+            void release_cpu_info(containers::dynamic_array<cpu_info>& cpus);
 
 			/**
 			 * Return the current core id the calling thread is running on.

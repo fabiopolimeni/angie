@@ -102,25 +102,33 @@ namespace angie {
 
 			types::boolean query_cpu_info(
 				containers::dynamic_array<cpu_info>& cpus) {
-                if (!cpuinfo_initialize())
+				const auto cpuinfo_ok = cpuinfo_initialize();
+                if (!cpuinfo_ok)
                     return false;
 
 				// cpuinfo is an advanced cpu detector, it distinguishes between
-				// clusters (for example big.LITTLE heterogeneous architectures)
+				// clusters, or groups (e.g. big.LITTLE heterogeneous architectures)
 				// and CPUs on different physical packages. In order to keep the
-				// api simple, we don't distinguish between the two, therefore,
+				// API simple, we don't distinguish between the two, therefore,
 				// their cluster structures, represents our single CPU. This will
 				// still allow us to distinguish between "faster/slower" CPUs.
-                const struct cpuinfo_cluster* clusters_begin = 
-					cpuinfo_get_clusters();
+                const struct cpuinfo_cluster* clusters_begin = cpuinfo_get_clusters();
 					
                 const auto num_of_clusters = cpuinfo_get_clusters_count();
-
-                if (containers::init(cpus, num_of_clusters)) {
+				const auto cpuarray_initialized = containers::init(cpus, num_of_clusters);
+                if (cpuarray_initialized) {
 					for (types::index clid = 0; clid < num_of_clusters; ++clid) {
                     	const struct cpuinfo_cluster* cluster = clusters_begin;
 
 						containers::dynamic_array<cpu_cache> data_caches;
+						containers::reserve(data_caches, 4);
+
+						// cpu_cache mock_cache = {
+						// 	1, 64000, 32, cache_usage::INSTRUCTION, cache_access::DEDICATED
+						// };
+
+						// containers::push(data_caches, mock_cache);
+						// return true;
 						
 						// We assume that a cluster shares the same
 						// cache caracteristis throughout the whole
@@ -169,8 +177,7 @@ namespace angie {
 						// Add the cpu to the list
 						containers::push(cpus, {
 							clid,
-							cpuinfo_vendor_to_string(cluster->vendor),
-							cpuinfo_arch_to_string(cluster->uarch),
+							cluster->package->name,
 							cluster->core_count,
 							cluster->processor_count,
 							data_caches,
@@ -182,6 +189,12 @@ namespace angie {
                 }
 
 				return false;
+			}
+
+			void release_cpu_info(containers::dynamic_array<cpu_info>& cpus) {
+				// Release memory allocaed to get cpu information
+				cpuinfo_deinitialize();
+				containers::release(cpus);
 			}
 
 			types::boolean get_current_core(types::index& core_id) {
