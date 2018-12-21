@@ -7,6 +7,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
+#include "angie/core/diagnostics/assert.hpp"
 #include "angie/core/system/system.hpp"
 #include "angie/core/system/report.hpp"
 
@@ -57,13 +58,14 @@ TEST_CASE( "System tests", "[system]" )
 	SECTION("Report") {
 		report::settings sets = {
 			report_callback,		// report callback
-			report::level::debug,	// minimum report level
+			report::level::debug,	// max report level
 			false,					// exit on error
 			true,					// abort on fatal
 			true					// callstack on exit
 		};
 
 		REQUIRE(report::init(sets));
+		report::issue(report::level::error, "after this we should print out the whole callstack");
 	}
 
     SECTION("System shutdown") {

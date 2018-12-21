@@ -64,6 +64,8 @@ extern "C" void atexit_callback() {
 			types::char8* string_ptr = string_buffer;
 			types::char8* string_end = string_ptr + string_buffer_size;
 
+			string_ptr += snprintf(string_ptr, string_end - string_ptr, "Callstack at exit\n");
+
 			// Resolve addresses to symbols
 			if (auto n_symbols = diagnostics::resolve_symbols(addresses, symbols,
 				n_frames, names_buffer, names_buffer_size)) {
@@ -73,7 +75,7 @@ extern "C" void atexit_callback() {
 					const auto& symbol = symbols[sIt];
 					auto written_chars = snprintf(string_ptr,
 						string_end - string_ptr,
-						"%0zX + %0X: %s\n[%s:%d]\n",
+						"%0zX + %0X: %s [%s:%d]\n",
 						(types::uintptr)addresses[sIt], symbol.offset,
 						symbol.function, symbol.file, symbol.line);
 
@@ -146,7 +148,7 @@ namespace angie {
 			}
 
 			void report::issue(report::level lvl, const types::char8* msg) {
-				if (g_settings.min_level < lvl || !g_settings.callback) {
+				if (g_settings.max_level < lvl || !g_settings.callback) {
 					return;
 				}
 

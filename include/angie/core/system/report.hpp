@@ -16,19 +16,19 @@ namespace angie {
             {
                 enum class level : types::uint8
 				{
-					debug,
-                    info,
-                    performance,
-                    warning,
+                    fatal,
                     error,
-                    fatal
+                    warning,
+                    performance,
+                    info,
+					debug
                 };
  
                 using callback = void (level lvl, const types::char8* msg);
 
 				struct settings {
 					callback*		callback;
-					level			min_level;
+					level			max_level;
 					types::boolean	exit_on_error;
 					types::boolean	abort_on_fatal;
 					types::boolean	callstack_at_exit;
