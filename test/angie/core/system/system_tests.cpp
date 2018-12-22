@@ -66,7 +66,6 @@ TEST_CASE( "System tests", "[system]" )
 		};
 
 		REQUIRE(report::init(sets));
-		report::issue(report::level::error, "after this we should print out the whole callstack");
 	}
 
 	SECTION("CPU brand name") {
