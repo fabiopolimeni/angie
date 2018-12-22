@@ -10,6 +10,7 @@
 #include "angie/core/diagnostics/assert.hpp"
 #include "angie/core/system/system.hpp"
 #include "angie/core/system/report.hpp"
+#include "angie/core/system/cpu.hpp"
 
 #include <cstdio>
 
@@ -66,6 +67,16 @@ TEST_CASE( "System tests", "[system]" )
 
 		REQUIRE(report::init(sets));
 		report::issue(report::level::error, "after this we should print out the whole callstack");
+	}
+
+	SECTION("CPU brand name") {
+		containers::dynamic_array<cpu_info> cpus = { 
+			nullptr, 0, 0
+		};
+
+		REQUIRE(system::query_cpu_info(cpus));
+		report::issue(report::level::info, cpus[0].brand_name);
+		system::release_cpu_info(cpus);
 	}
 
     SECTION("System shutdown") {
