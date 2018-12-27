@@ -28,3 +28,6 @@
 	path = externals/cpuinfo
 	url = https://github.com/pytorch/cpuinfo.git
 	ignore = dirty
+[submodule "externals/sds"]
+	path = externals/sds
+	url = https://github.com/antirez/sds.git
