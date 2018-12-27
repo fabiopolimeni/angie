@@ -34,7 +34,7 @@ namespace angie {
             using intptr = intptr_t;
             using uintptr = uintptr_t;
 
-            using size = size_t;
+            using size = uint64_t;
             using byte = uint8_t;
 
 			using index = types::uint32;

@@ -371,6 +371,17 @@ namespace angie {
 				return reserve(dst, num);
 			}
 
+			template<typename T>
+			inline dynamic_array<T> make_dynamic_array(types::size num = 0,
+				const memory::allocator& allocator = memory::get_default_allocator()) {
+				dynamic_array<T> new_array = {
+					nullptr, 0, 0, allocator
+				};
+
+				init(new_array, num);
+				return new_array;
+			}
+
 			/**
 			 * Remove last `num` elements from the array.
 			 *
@@ -435,8 +446,8 @@ namespace angie {
 					// allocators do not truly reallocate memory if the
 					// given size is less than the original one used when
 					// initially instantiate the pointer. We assume that,
-					// when the user calls this function, she does it with
-					// the intention of returning memory to the system.
+					// when the user calls this function, it is with the
+					// intention of returning memory to the system.
 					// Therefore, because of the above behaviour, if we would
 					// simply `realloc`, the user would never benefit from
 					// this function call, hence, we allocate a new buffer of
@@ -452,12 +463,11 @@ namespace angie {
 
 					// dst.data must be not-null, because we check
 					// whether the new capacity is less than the old
-					// one, therefore dst.data for being null,
+					// one, therefore, for dst.data to be null,
 					// the capacity should be zero and we would never
 					// enter this block as capacity is of an unsigned.
 					angie_assert(dst.data, "dst.data can't be null");
-					memory::move(new_data, dst.data,
-						compute_size<T>(dst.count));
+					memory::move(new_data, dst.data, compute_size<T>(dst.count));
 
 					// Whether we have allocated new memory or not, this
 					// function results in freeing the previous buffer.

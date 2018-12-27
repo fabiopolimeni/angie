@@ -9,6 +9,9 @@
 #include "angie/core/defines.hpp"
 #include "angie/core/types.hpp"
 
+#include <cstdarg>
+#include <cstdio>
+
 namespace angie {
     namespace core {
         namespace utils {
@@ -66,20 +69,25 @@ namespace angie {
                     ? v : next_power_of_two(v);
             }
 
-            // std::string message_format(const char* Message, ...)
-            // {
-            //     std::size_t const STRING_BUFFER(4096);
-            //     char Buffer[STRING_BUFFER];
-            //     va_list List;
+            /**
+             * @fixme: This implementation is everything but secure or elegant.
+             *         Change and make it part of a proper string implementation.
+             */
+            inline
+            const types::char8* format(const char* msg, ...)
+            {
+                types::size const STRING_BUFFER(4096);
+                static types::char8 buffer[STRING_BUFFER] = { 0 };
+                
+                if (msg != nullptr) {
+                    va_list list;
+                    va_start(list, msg);
+                    vsprintf_s(buffer, msg, list);
+                    va_end(list);
+                }
 
-            //     if(Message == nullptr)
-            //         return std::string();
-
-            //     va_start(List, Message);
-            //     vsprintf(Buffer, Message, List);
-            //     va_end(List);
-            //     return Buffer;
-            // }
+                return buffer;
+            }
 
         }
     }

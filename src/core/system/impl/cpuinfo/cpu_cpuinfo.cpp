@@ -13,14 +13,6 @@
 namespace {
 	using namespace angie::core::system;
 	using namespace angie::core::types;
-	
-	const char8* cpuinfo_vendor_to_string(cpuinfo_vendor vendor) {
-		return nullptr;
-	}
-
-	const char8* cpuinfo_arch_to_string(cpuinfo_uarch arch) {
-		return nullptr;
-	}
 
 	cpu_cache cpuinfo_to_cpu_cache(const cpuinfo_cache* cache, uint8 cache_id) {
 		return { 
