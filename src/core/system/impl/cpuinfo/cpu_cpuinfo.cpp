@@ -118,13 +118,6 @@ namespace angie {
 
 						containers::dynamic_array<cpu_cache> data_caches;
 						containers::reserve(data_caches, 4);
-
-						// cpu_cache mock_cache = {
-						// 	1, 64000, 32, cache_usage::INSTRUCTION, cache_access::DEDICATED
-						// };
-
-						// containers::push(data_caches, mock_cache);
-						// return true;
 						
 						// We assume that a cluster shares the same
 						// cache caracteristis throughout the whole

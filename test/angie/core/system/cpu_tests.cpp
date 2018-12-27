@@ -13,9 +13,7 @@ TEST_CASE("CPU tests", "[cpu]")
 	using namespace angie::core::system;
 
 	SECTION("CPU query info") {
-		containers::dynamic_array<cpu_info> cpus = { 
-			nullptr, 0, 0
-		};
+		containers::dynamic_array<cpu_info> cpus;
 
 		REQUIRE(system::query_cpu_info(cpus));
 		REQUIRE(containers::get_count(cpus) > 0);
@@ -28,9 +26,7 @@ TEST_CASE("CPU tests", "[cpu]")
 	}
 
 	SECTION("CPU current id") {
-		containers::dynamic_array<cpu_info> cpus = { 
-			nullptr, 0, 0
-		};
+		containers::dynamic_array<cpu_info> cpus;
 
 		REQUIRE(system::query_cpu_info(cpus));
 		auto core_id = system::get_current_processor();

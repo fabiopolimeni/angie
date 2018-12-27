@@ -60,10 +60,8 @@ int main(int32_t argc, char* argv[]) {
 
     report::init(sets);
 
-    containers::dynamic_array<cpu_info> cpus = { 
-		nullptr, 0, 0
-	};
-
+    containers::dynamic_array<cpu_info> cpus;
+    
     system::query_cpu_info(cpus);
     report::issue(report::level::info, cpus[0].brand_name);
     system::release_cpu_info(cpus);
