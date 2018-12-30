@@ -295,7 +295,7 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		REQUIRE(containers::resize(from_a, 14));
 		REQUIRE(containers::write_buffer("Lore Ipsum est", 14, from_a));
 
-		REQUIRE(containers::extract(from_a, 5, 6, into_a));
+		REQUIRE(containers::extract(into_a, from_a, 5, 6));
 		REQUIRE(memory::is_equal(into_a.data, "Ipsum", 5));
 		REQUIRE(memory::is_equal(from_a.data, "Lore est", from_a.count));
 	}

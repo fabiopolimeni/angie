@@ -8,10 +8,11 @@
 
 #include "angie/core/types.hpp"
 #include "angie/core/utils.hpp"
+#include "angie/core/diagnostics/assert.hpp"
 #include "angie/core/algorithm.hpp"
 #include "angie/core/memory/allocator.hpp"
 #include "angie/core/memory/manipulation.hpp"
-#include "angie/core/diagnostics/assert.hpp"
+#include "angie/core/buffers/array_buffer.hpp"
 #include "angie/core/containers/common.hpp"
 
 namespace angie {
@@ -106,7 +107,7 @@ namespace angie {
 					// must be aligned to sizeof(T) and capacity power of two.
 					return (get_capacity(arr) && get_count(arr) <= get_capacity(arr) &&
 						utils::is_multiple_of(
-							(types::uintptr)get_data(arr), get_type_alignment<T>()))
+							(types::uintptr)get_data(arr), buffers::get_type_alignment<T>()))
 						? state::ready : state::inconsistent_properties;
 				}
 				else {
@@ -150,7 +151,7 @@ namespace angie {
 				return (memory::is_equal(&left, &right, sizeof(left))
 					|| ((get_count(left) == get_count(right) && get_count(left) > 0)
 						&& memory::is_equal(get_data(left), get_data(right),
-							compute_size<T>(get_count(left)))));
+							buffers::compute_size<T>(get_count(left)))));
 			}
 
 			/**
@@ -238,7 +239,7 @@ namespace angie {
 
 				if (num > 0 && dst.allocator) {
 					auto new_count = num + get_count(dst);
-					auto new_capacity = compute_capacity(new_count);
+					auto new_capacity = buffers::compute_capacity(new_count);
 
 					// Check whether the final capacity of the buffer is less
 					// than, or equal, to the current one. If so, return.
@@ -247,8 +248,8 @@ namespace angie {
 					}
 
 					auto new_data = static_cast<T*>(dst.allocator->realloc(
-						get_data(dst), compute_size<T>(new_capacity),
-						get_type_alignment<T>()));
+						get_data(dst), buffers::compute_size<T>(new_capacity),
+						buffers::get_type_alignment<T>()));
 
 					if (new_data) {
 						dst.data = new_data;
@@ -322,7 +323,7 @@ namespace angie {
 					auto start = get_count(dst) - n_to_clear;
 					angie_assert(get_data(dst), "Non empty arrays must have valid `data`");
 
-					memory::set(get_data(dst) + start, value, compute_size<T>(n_to_clear));
+					memory::set(get_data(dst) + start, value, buffers::compute_size<T>(n_to_clear));
 					dst.count = start;
 				}
 			}
@@ -363,7 +364,7 @@ namespace angie {
 					return true;
 				}
 
-				auto new_capacity = compute_capacity(get_count(dst));
+				auto new_capacity = buffers::compute_capacity(get_count(dst));
 				if (new_capacity < get_capacity(dst)) {
 					// We can't simply `realloc` here, because most of the
 					// allocators do not truly reallocate memory if the
@@ -377,7 +378,7 @@ namespace angie {
 					// `new_capacity` size, move data from the original one
 					// and finally release the old memory.
 					auto* new_data = static_cast<T*>(dst.allocator->alloc(
-						compute_size<T>(new_capacity), get_type_alignment<T>()));
+						buffers::compute_size<T>(new_capacity), buffers::get_type_alignment<T>()));
 
 					// Allocation might fail
 					if (new_data == nullptr) {
@@ -390,7 +391,7 @@ namespace angie {
 					// the capacity should be zero and we would never
 					// enter this block as capacity is of an unsigned.
 					angie_assert(dst.data, "dst.data can't be null");
-					memory::move(new_data, get_data(dst), compute_size<T>(get_count(dst)));
+					memory::move(new_data, get_data(dst), buffers::compute_size<T>(get_count(dst)));
 
 					// Whether we have allocated new memory or not, this
 					// function results in freeing the previous buffer.
@@ -426,7 +427,7 @@ namespace angie {
 					return false;
 				}
 
-				auto new_capacity = compute_capacity(new_size);
+				auto new_capacity = buffers::compute_capacity(new_size);
 
 				// Check whether the final capacity of the buffer differs
 				// if this is not the case, then, there is no need to realloc.
@@ -441,8 +442,8 @@ namespace angie {
 				// @note: Memory will probably be truly reallocated only
 				// when the new items wouldn't fit into the current capacity.
 				auto* new_data = static_cast<T*>(dst.allocator->realloc(
-					get_data(dst), compute_size<T>(new_capacity),
-					get_type_alignment<T>()));
+					get_data(dst), buffers::compute_size<T>(new_capacity),
+					buffers::get_type_alignment<T>()));
 
 				// Either both `capacity` and `data` are null,
 				// or both need to be valid.
@@ -549,7 +550,7 @@ namespace angie {
 						while (count > 0) {
 							// Move as much as memory in one call
 							memory::move(get_data(dst) + end, get_data(dst) + begin,
-								compute_size<T>(count));
+								buffers::compute_size<T>(count));
 							
 							auto diff = algorithm::min(count, begin - from);
 							count = diff;
@@ -597,11 +598,12 @@ namespace angie {
 			 * Remove `num` elements starting at `from` maintaining the order.
 			 *
 			 * This function will not result in memory reallocation, and it will
-			 * be potentially slower than `loose()`. Elements will be kept in
-			 * the order they were before the removal. Memory `move` or `copy`
-			 * cannot operate on overlapping buffers, and this can be the case
-			 * for the type of operations required by the function, therefore
-			 * the algorithm used cannot take advantage of such manipulators.
+			 * be potentially slower than `replace_with_last()`.
+			 * Elements will be kept in the order they were before the removal.
+			 * 
+			 * @note: Memory `move` or `copy` cannot operate on overlapping buffers.
+			 * Because this can be the case while manipulate array's memory this
+			 * algorithm cannot take advantage of such manipulators.
 			 * 
 			 * @note: Copy constructor, or assignment, won't be called here,
 			 * memory will be copied directly from the given object instead.
@@ -671,7 +673,7 @@ namespace angie {
 				// Move manipulator can't cope with zero size either
 				if (auto n_to_move = get_count(dst) - move_from) {
 					memory::move(get_data(dst) + from, get_data(dst) + move_from,
-						compute_size<T>(n_to_move));
+						buffers::compute_size<T>(n_to_move));
 				}
 
 				dst.count -= n_to_remove;
@@ -697,7 +699,7 @@ namespace angie {
 				dynamic_array<T>& dst, types::uintptr at = 0) {
 				angie_assert(src, "Source buffer must be not-null");
 				
-				if (n_bytes && make_space(dst, at, compute_count<T>(n_bytes))) {
+				if (n_bytes && make_space(dst, at, buffers::compute_count<T>(n_bytes))) {
 					return !!(memory::copy(get_data(dst) + at, src, n_bytes));
 				}
 				
@@ -726,7 +728,7 @@ namespace angie {
 				types::uintptr at = 0) {
 				angie_assert(src, "Source buffer must be valid");
 				angie_assert(at < get_count(dst));
-				angie_assert(n_bytes <= compute_size<T>(get_count(dst) - at));
+				angie_assert(n_bytes <= buffers::compute_size<T>(get_count(dst) - at));
 
 				return !!(memory::copy(get_data(dst) + at, src, n_bytes));
 			}
@@ -760,7 +762,7 @@ namespace angie {
 				auto count = algorithm::min(get_count(src) - from, num);
 				if (count && resize(dst, count)) {
 					return !!(memory::copy(get_data(dst), get_data(src) + from,
-						compute_size<T>(count)));
+						buffers::compute_size<T>(count)));
 				}
 
 				// Do not consider zero size calls an error.
@@ -794,7 +796,7 @@ namespace angie {
 				auto n_to_copy = algorithm::min(get_count(src) - from, num);
 				if (n_to_copy && make_space(dst, at, n_to_copy)) {
 					return write_buffer(get_data(src) + from,
-						compute_size<T>(n_to_copy), dst, at);
+						buffers::compute_size<T>(n_to_copy), dst, at);
 				}
 
 				// Do not consider a zero size copy an error
@@ -839,8 +841,9 @@ namespace angie {
 			 * @return true if successful, false otherwise
 			 */
 			template <typename T, typename U>
-			inline types::boolean extract(dynamic_array<U>& src,
-				types::uintptr from, types::size num, dynamic_array<T>& dst) {
+			inline types::boolean extract(
+				dynamic_array<T>& dst, dynamic_array<U>& src,
+				types::uintptr from, types::size num) {
 				angie_assert(is_valid(src));
 				angie_assert(is_valid(dst));
 

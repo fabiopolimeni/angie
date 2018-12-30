@@ -21,9 +21,10 @@ set(INTERFACE_FILES
 	${ANGIE_INCLUDE_DIR}/angie/core/memory/global.hpp
 	${ANGIE_INCLUDE_DIR}/angie/core/memory/manipulation.hpp
 	${ANGIE_INCLUDE_DIR}/angie/core/memory/allocator.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/buffers/array_buffer.hpp
 	${ANGIE_INCLUDE_DIR}/angie/core/containers/common.hpp
 	${ANGIE_INCLUDE_DIR}/angie/core/containers/dynamic_array.hpp
-	${ANGIE_INCLUDE_DIR}/angie/core/string/dynamic_string.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/strings/dynamic_string.hpp
 	${ANGIE_INCLUDE_DIR}/angie/core/system/system.hpp
 	${ANGIE_INCLUDE_DIR}/angie/core/system/report.hpp
 	${ANGIE_INCLUDE_DIR}/angie/core/system/cpu.hpp)

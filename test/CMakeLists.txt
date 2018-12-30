@@ -28,6 +28,14 @@ add_test(NAME angie_array_tests COMMAND angie_array_tests)
 set_target_properties(angie_array_tests PROPERTIES FOLDER
     "angie/core/containers")
 
+# String tests
+add_executable(angie_string_tests
+    angie/core/strings/string_tests.cpp)
+target_link_libraries(angie_string_tests angie_core)
+add_test(NAME angie_string_tests COMMAND angie_string_tests)
+set_target_properties(angie_string_tests PROPERTIES FOLDER
+    "angie/core/strings")
+
 # CPU tests
 add_executable(angie_cpu_tests
     angie/core/system/cpu_tests.cpp)
