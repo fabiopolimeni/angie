@@ -14,7 +14,7 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 
 	SECTION("Init strings") {
         int16_t number = 6993;
-		dynamic_string<types::char8> fmt_string = format<types::char8>("number=%d", number);
+		ansi_string fmt_string = format("number=%d", number);
 
 		REQUIRE(true);
 	}

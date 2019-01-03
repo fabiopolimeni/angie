@@ -21,7 +21,7 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		REQUIRE(containers::init(u32_array, 12));
 		REQUIRE(u32_array.data != nullptr);
 		REQUIRE(u32_array.count == 0);
-		REQUIRE(containers::is_empty(u32_array));
+		REQUIRE(buffers::is_empty(u32_array));
 
 		containers::release(u32_array);
 		REQUIRE(containers::get_state(u32_array) == containers::state::ready);
@@ -32,13 +32,13 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 
 		containers::reserve(u32_array, 4);
 		REQUIRE(containers::get_state(u32_array) == containers::state::ready);
-		REQUIRE(containers::is_empty(u32_array));
-		REQUIRE(containers::get_capacity(u32_array) > 0);
+		REQUIRE(buffers::is_empty(u32_array));
+		REQUIRE(buffers::get_capacity(u32_array) > 0);
 
 		types::size more_elements = 13;
 		containers::reserve(u32_array, more_elements);
 		REQUIRE(u32_array.capacity > 13);
-		REQUIRE(containers::is_empty(u32_array));
+		REQUIRE(buffers::is_empty(u32_array));
 
 		containers::release(u32_array);
 	}
@@ -48,9 +48,9 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		
 		REQUIRE(containers::init(i16_a));
 		REQUIRE(containers::is_valid(i16_a));
-		REQUIRE(containers::is_empty(i16_a));
+		REQUIRE(buffers::is_empty(i16_a));
 		REQUIRE(containers::resize(i16_a, 3));
-		REQUIRE(containers::is_empty(i16_a) == false);
+		REQUIRE(buffers::is_empty(i16_a) == false);
 		REQUIRE(i16_a.count == 3);
 		REQUIRE(i16_a.capacity == 4);
 		REQUIRE(containers::reserve(i16_a, 2));
@@ -59,10 +59,10 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		REQUIRE(containers::resize(i16_a, 7));
 		REQUIRE(i16_a.capacity == 8);
 		REQUIRE(i16_a.count == 7);
-		REQUIRE(containers::is_full(i16_a) == false);
+		REQUIRE(buffers::is_full(i16_a) == false);
 		REQUIRE(containers::resize(i16_a, 0));
 		REQUIRE(containers::is_valid(i16_a));
-		REQUIRE(containers::is_empty(i16_a));
+		REQUIRE(buffers::is_empty(i16_a));
 
 		containers::release(i16_a);
 	}
@@ -74,7 +74,7 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		REQUIRE(u32_a.count == 5);
 		REQUIRE(u32_a.capacity == 8);
 
-		containers::clear(u32_a, 3);
+		buffers::clear(u32_a, 3);
 		REQUIRE(u32_a.count == 2);
 		REQUIRE(u32_a.capacity == 8);
 
@@ -88,7 +88,7 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		REQUIRE(u32_a.count == 5);
 		REQUIRE(u32_a.capacity == 8);
 
-		containers::clear(u32_a, 3);
+		buffers::clear(u32_a, 3);
 		REQUIRE(u32_a.count == 2);
 		REQUIRE(u32_a.capacity == 8);
 
@@ -96,8 +96,8 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		REQUIRE(u32_a.count == 2);
 		REQUIRE(u32_a.capacity == 4);
 
-		containers::clear(u32_a, 6);
-		REQUIRE(containers::is_empty(u32_a));
+		buffers::clear(u32_a, 6);
+		REQUIRE(buffers::is_empty(u32_a));
 		REQUIRE(containers::fit(u32_a));
 		REQUIRE(u32_a.capacity == 0);
 
@@ -108,13 +108,13 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		containers::dynamic_array<types::uint32> u32_a;
 
 		REQUIRE(containers::resize(u32_a, 5));
-		REQUIRE(containers::set(u32_a, 57u, 0, 7));
+		REQUIRE(buffers::set(u32_a, 57u, 0, 7));
 
 		for (auto i = 0u; i < u32_a.count; ++i) {
 			REQUIRE(u32_a.data[0] == 57u);
 		}
 
-		REQUIRE(containers::set(u32_a, 27u, 1, 1));
+		REQUIRE(buffers::set(u32_a, 27u, 1, 1));
 		REQUIRE(u32_a.data[0] == 57u);
 		REQUIRE(u32_a.data[1] == 27u);
 
@@ -125,7 +125,7 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		containers::dynamic_array<types::uint32> u32_a;
 
 		REQUIRE(containers::init(u32_a, 8));
-		REQUIRE(containers::is_empty(u32_a));
+		REQUIRE(buffers::is_empty(u32_a));
 
 		// [0,0,0]
 		REQUIRE(containers::add(u32_a, 0u, 0, 3));
@@ -175,8 +175,10 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 			u32_a.data[i] = i;
 		}
 
+		types::size n_removed = 0;
+
 		// [0,1,4,5,6]
-		REQUIRE(containers::remove(u32_a, 2, 2));
+		REQUIRE(containers::remove(u32_a, 2, 2, n_removed));
 		REQUIRE(u32_a.count == 5);
 		REQUIRE(u32_a.capacity == 8);
 		REQUIRE(u32_a.data[0] == 0u);
@@ -186,11 +188,11 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		REQUIRE(u32_a.data[4] == 6u);
 
 		// [0,1,4]
-		REQUIRE(containers::remove(u32_a, 3, 3));
+		REQUIRE(containers::remove(u32_a, 3, 3, n_removed));
 		REQUIRE(u32_a.count == 3);
 
 		// [1,4]
-		REQUIRE(containers::remove(u32_a, 0, 1));
+		REQUIRE(containers::remove(u32_a, 0, 1, n_removed));
 		REQUIRE(u32_a.count == 2);
 		REQUIRE(u32_a.capacity == 8);
 		REQUIRE(u32_a.data[0] == 1u);
@@ -227,7 +229,7 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		REQUIRE(u8_a.data[1] == 6);
 
 		REQUIRE(containers::replace_with_last(u8_a, 0, 4));
-		REQUIRE(containers::is_empty(u8_a));
+		REQUIRE(buffers::is_empty(u8_a));
 
 		containers::release(u8_a);
 	}
@@ -239,10 +241,10 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 
 		REQUIRE(containers::resize(str_a, 14));
 
-		REQUIRE(containers::write_buffer(str_buffer, 4, str_a));
+		REQUIRE(buffers::write(str_buffer, 4, str_a));
 		REQUIRE(memory::is_equal(str_a.data, str_buffer, 4));
 
-		REQUIRE(containers::write_buffer(str_buffer, 14, str_a));
+		REQUIRE(buffers::write(str_buffer, 14, str_a));
 		REQUIRE(memory::is_equal(str_a.data, str_buffer, 14));
 	}
 
@@ -253,7 +255,7 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		containers::from_buffer("Lore Ipsum est", 14, phrase_a);
 
 		REQUIRE(containers::copy(str_a, phrase_a));
-		REQUIRE(containers::equal(str_a, phrase_a));
+		REQUIRE(buffers::equal(str_a, phrase_a));
 	}
 
 	SECTION("Insert array") {
@@ -267,9 +269,9 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 
 		// [?,P,o,l,i,m,e,n,i]
 		REQUIRE(containers::insert(str_a, 1, surname_a));
-		REQUIRE(containers::get_count(str_a) == 9);
+		REQUIRE(buffers::get_count(str_a) == 9);
 		
-		containers::at(str_a, 0) = ' ';
+		buffers::get(str_a, 0) = ' ';
 
 		// [F,a,b,i,o, ,P,o,l,i,m,e,n,i]
 		REQUIRE(containers::insert(str_a, 0, name_a));
@@ -283,7 +285,7 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		containers::from_buffer("Lore Ipsum est", 14, phrase_a);
 
 		REQUIRE(containers::append(str_a, phrase_a));
-		REQUIRE(containers::equal(str_a, phrase_a));
+		REQUIRE(buffers::equal(str_a, phrase_a));
 	}
 
 	SECTION("Extract array") {
@@ -293,7 +295,7 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		containers::dynamic_array<types::char8> from_a;
 		REQUIRE(containers::init(from_a, 14));
 		REQUIRE(containers::resize(from_a, 14));
-		REQUIRE(containers::write_buffer("Lore Ipsum est", 14, from_a));
+		REQUIRE(buffers::write("Lore Ipsum est", 14, from_a));
 
 		REQUIRE(containers::extract(into_a, from_a, 5, 6));
 		REQUIRE(memory::is_equal(into_a.data, "Ipsum", 5));
@@ -313,16 +315,16 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		REQUIRE(containers::push(str_a, 'u'));
 		REQUIRE(containers::push(str_a, 'm'));
 		REQUIRE(memory::is_equal(str_a.data, "Lore Ipsum", str_a.count));
-		REQUIRE(containers::get_count(str_a) == 10);
-		REQUIRE(containers::get_capacity(str_a) == 16);
+		REQUIRE(buffers::get_count(str_a) == 10);
+		REQUIRE(buffers::get_capacity(str_a) == 16);
 		
-		auto count = containers::get_count(str_a);
+		auto count = buffers::get_count(str_a);
 		for (auto i = 0u; i < count; ++i) {
 			types::char8 c = '\0';
 			REQUIRE(containers::pop(str_a, c));
 		}
 
-		REQUIRE(containers::is_empty(str_a));
+		REQUIRE(buffers::is_empty(str_a));
 
 		types::char8 e = 'r';
 		REQUIRE(containers::pop(str_a, e) == false);

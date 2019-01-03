@@ -99,8 +99,9 @@ namespace angie {
 			types::boolean query_cpu_info(
 				containers::dynamic_array<cpu_info>& cpus) {
 				const auto cpuinfo_ok = cpuinfo_initialize();
-                if (!cpuinfo_ok)
+                if (!cpuinfo_ok) {
                     return false;
+				}
 
 				// cpuinfo is an advanced cpu detector, it distinguishes between
 				// clusters, or groups (e.g. big.LITTLE heterogeneous architectures)
@@ -160,15 +161,18 @@ namespace angie {
 						dynamic_array<types::boolean> features;
 						containers::init(features, cpu_feature::COUNT);
 						containers::resize(features, cpu_feature::COUNT);
-						containers::set(features, false, 0, cpu_feature::COUNT);
+						buffers::set(features, false, 0, cpu_feature::COUNT);
 						cpuinfo_load_features(features);
+
+						auto* core = cpuinfo_get_core(cluster->core_start);
 
 						// Add the cpu to the list
 						containers::push(cpus, {
-							clid,
+							cluster->cluster_id,
 							cluster->package->name,
 							cluster->core_count,
 							cluster->processor_count,
+							core->frequency,
 							data_caches,
 							features
 						});

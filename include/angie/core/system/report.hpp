@@ -56,6 +56,30 @@ namespace angie {
 				 * Issue a report.
 				 */
 				void issue(level lvl, const types::char8* msg);
+
+				inline void debug(const types::char8* msg) {
+					issue(level::debug, msg);
+				}
+
+				inline void info(const types::char8* msg) {
+					issue(level::info, msg);
+				}
+
+				inline void performance(const types::char8* msg) {
+					issue(level::performance, msg);
+				}
+
+				inline void warning(const types::char8* msg) {
+					issue(level::warning, msg);
+				}
+
+				inline void error(const types::char8* msg) {
+					issue(level::error, msg);
+				}
+
+				inline void fatal(const types::char8* msg) {
+					issue(level::fatal, msg);
+				}
             }
             
         }

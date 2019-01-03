@@ -2,6 +2,7 @@
 #include "angie/core/system/system.hpp"
 #include "angie/core/system/report.hpp"
 #include "angie/core/system/cpu.hpp"
+#include "angie/core/strings/dynamic_string.hpp"
 
 #include <cstdio>
 #include <cstdint>
@@ -44,6 +45,7 @@ int main(int32_t argc, char* argv[]) {
 
     using namespace angie::core;
 	using namespace angie::core::system;
+	using namespace angie::core::strings;
 
     if (system::init() != system::error::ok) {
         fprintf_s(stderr, "Some error occurred while initializing the system");
@@ -62,9 +64,22 @@ int main(int32_t argc, char* argv[]) {
 
     containers::dynamic_array<cpu_info> cpus;
     
-    system::query_cpu_info(cpus);
-    report::issue(report::level::info, cpus[0].brand_name);
-    system::release_cpu_info(cpus);
+    if (system::query_cpu_info(cpus)) {
+		// Print out all cpus found on this device
+		for (uint64_t i = 0; i < buffers::get_count(cpus); ++i) {
+			// E.g. Brand name @ GHz (Cores/Processors)
+			const auto& cpu = buffers::get(cpus, i);
+			ansi_string cpu_string = strings::format("%s @ %dHz (%d/%d)",
+				cpu.brand_name, cpu.frequency,
+				cpu.physical_cores, cpu.logical_processors
+			);
+
+			report::info(cpu_string);
+			containers::release(cpu_string);
+		}
+
+		system::release_cpu_info(cpus);
+	}
 
     system::shutdown();
     return EXIT_SUCCESS;

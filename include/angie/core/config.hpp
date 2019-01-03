@@ -47,3 +47,10 @@
 #ifndef ANGIE_MAX_ALLOCATION_SIZE
 #define ANGIE_MAX_ALLOCATION_SIZE (1 << 30)
 #endif
+
+/**
+ * Maximum number of characters of a formatted string
+ */
+#ifndef ANGIE_MAX_FORMAT_CHARS
+#define ANGIE_MAX_FORMAT_CHARS 1024
+#endif // ANGIE_MAX_FORMAT_CHARS

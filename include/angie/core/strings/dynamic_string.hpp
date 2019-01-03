@@ -1,17 +1,10 @@
-// Copyright (c) 2017 Fabio Polimeni
+// Copyright (c) 2018 Fabio Polimeni
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
 #pragma once
 
-#include "angie/core/types.hpp"
-#include "angie/core/utils.hpp"
-#include "angie/core/algorithm.hpp"
-#include "angie/core/memory/allocator.hpp"
-#include "angie/core/memory/manipulation.hpp"
-#include "angie/core/buffers/array_buffer.hpp"
-#include "angie/core/containers/common.hpp"
-#include "angie/core/diagnostics/assert.hpp"
+#include "angie/core/containers/dynamic_array.hpp"
 
 namespace angie {
 	namespace core {
@@ -34,26 +27,49 @@ namespace angie {
 			 * @tparam T it must be of a POD type.
 			 */
 			template <typename T>
-			struct dynamic_string : buffers::array_buffer<T> {
-				const memory::allocator*    allocator 	= &memory::get_default_allocator();
-
-				T& operator[](types::size idx) {
-                    angie_assert(buffer);
-					return buffer->data[idx];
-				}
-
-    			const T& operator[](types::size idx) const {
-                    angie_assert(buffer);
-					return buffer->data[idx];
-				}
+			struct dynamic_string : containers::dynamic_array<T> {
+				
+				// This operator allows to use the string class
+				// with lvalues of const T* type, such const char*.
+				operator const T*() const { return cstr(*this); }
 			};
 
-			template<typename T>
-			inline dynamic_string<T> format(const T* msg, ...) {
-				return dynamic_string<T>();
+			/**
+			 * Get the C string pointer.
+			 */
+			template <typename T>
+			inline T* cstr(const dynamic_string<T>& str) {
+				return buffers::get_data(str);
 			}
+
+			/**
+			 * Get the length of the string.
+			 */
+			template <typename T>
+			inline types::size length(const dynamic_string<T>& str) {
+				return buffers::get_count(str);
+			}
+
+			/**
+			 * ANSI string
+			 */
+			using ansi_string = dynamic_string<types::char8>;
+
+			/**
+			 * Format a string from the given arguments.
+			 * Formatting rules are the same as the C
+			 * standard library `sprintf`.
+			 * 
+			 * @param msg String to format.
+			 * @return Formatted string.
+			 */
+			const ansi_string& format(const types::char8* fmt, ...);
+
+			/**
+			 * UTF8 string
+			 */
+			using utf8_string = dynamic_string<types::char8>;
             
         }
     }
 }
-

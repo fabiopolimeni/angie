@@ -77,15 +77,35 @@ namespace angie {
 			}
 
 			/**
+			 * Struct to hold the allocator of an array buffer.
+			 * This structure is meant to be used as an inherited
+			 * struct of a dynamic buffer implementation.
+			 */
+			struct array_allocator {
+				const memory::allocator& allocator = memory::get_default_allocator();
+
+				// array_allocator(const array_allocator&) = delete;
+				// array_allocator& operator=(const array_allocator&) = delete;
+			};
+
+			/**
 			 * This data representation will allow to store data
 			 * and meta-data within the same allocation unit.
 			 * It will allow cache-friendly allocation patterns.
 			 */
 			template <typename T>
 			struct array_buffer {
-				types::size count;
-				types::size	capacity;
-				T* 			data;
+				types::size count		= 0;
+				types::size	capacity	= 0;
+				T* 			data		= nullptr;
+
+				T& operator[](types::size idx) {
+					return data[idx];
+				}
+
+    			const T& operator[](types::size idx) const {
+					return data[idx];
+				}
 			};
 
             /**
@@ -98,6 +118,18 @@ namespace angie {
 			template <typename T>
 			inline T* get_data(const array_buffer<T>& arr) {
 				return arr.data;
+			}
+
+            /**
+			 * Set data pointer of the array.
+			 *
+			 * @tparam T POD type
+			 * @param arr Array object to check
+			 * @param ptr Memory address the data of this array points to
+			 */
+			template <typename T>
+			inline void set_data(array_buffer<T>& arr, T* ptr) {
+				arr.data = ptr;
 			}
 
 			/**
@@ -113,6 +145,19 @@ namespace angie {
 			}
 
 			/**
+			 * Set the number of elements hold by this array.
+			 *
+			 * @tparam T POD type
+			 * @param arr Array object to query
+			 * @param count Number of element held by the array
+			 */
+			template <typename T>
+			inline void set_count(array_buffer<T>& arr,
+				types::size count) {
+				arr.count = count;
+			}
+
+			/**
 			 * Get the capacity of this array.
 			 *
 			 * @tparam T POD type
@@ -122,6 +167,19 @@ namespace angie {
 			template <typename T>
 			inline types::size get_capacity(const array_buffer<T>& arr) {
 				return arr.capacity;
+			}
+
+			/**
+			 * Set the capacity of this array.
+			 *
+			 * @tparam T POD type
+			 * @param arr Array object to query
+			 * @param capacity Max number of elements this array can hold
+			 */
+			template <typename T>
+			inline void set_capacity(array_buffer<T>& arr,
+				types::size capacity) {
+				arr.capacity = capacity;
 			}
 
 			/**
@@ -223,7 +281,7 @@ namespace angie {
 					memory::set(get_data(dst) + start, value,
 						buffers::compute_size<T>(n_to_clear));
 
-					dst.count = start;
+					buffers::set_count(dst, start);
 				}
 			}
 
@@ -246,15 +304,14 @@ namespace angie {
 			template <typename T>
 			inline types::boolean set(array_buffer<T>& dst, T elem,
 				types::uintptr from, types::size num = 1) {
-				angie_assert(is_valid(dst));
 				angie_assert(from < get_count(dst));
 
 				auto count = algorithm::min(from + num, get_count(dst));
 				while (from < count) {
 					// We could use the assignment/copy contructor here.
-					// Although, if the given POD object includes some const
-					// member definition in it, the compiler will return an
-					// error because a default copy constructor will bot be 
+					// Although, if the given POD object includes some
+					// member declared const, the compiler will return an
+					// error because a default copy constructor will be 
 					// generated if not overwritten.
 					// Because one of the principle of this library is to
 					// remove as much as possible the common boilerplate code
@@ -321,11 +378,11 @@ namespace angie {
 			 * Replace `num` elements starting at `from` with last `num`.
 			 *
 			 * This function will not guarantee to keep the elements ordered
-			 * w.r.t. the positions they have at the time the array is passed in.
-			 * This function replaces the positions of elements you
-			 * with the last `num` elements. Because of this assumption
-			 * it may result in a faster operation than `remove()`, as it does
-			 * not have to overwrite one element at a time with a reverse loop.
+			 * w.r.t. the positions they have at the time the array is passed.
+			 * This function replaces the positions of elements with the last
+			 * number of elements. Because of this assumption, it may result
+			 * in a faster operation than `remove()`, as it does not have to
+			 * overwrite one element at a time with a reverse loop.
 			 * This function does not reallocate memory in any how.
 			 *
 			 * @tparam T POD type

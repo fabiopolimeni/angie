@@ -187,6 +187,7 @@ namespace angie {
                 const types::char8*                 brand_name;
                 const types::uint32                 physical_cores;
                 const types::uint32                 logical_processors;
+                const types::uint64                 frequency;
                 const dynamic_array<cpu_cache>      data_caches;   
                 const dynamic_array<types::boolean> features;
             };

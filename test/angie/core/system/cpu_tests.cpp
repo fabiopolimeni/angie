@@ -16,9 +16,9 @@ TEST_CASE("CPU tests", "[cpu]")
 		containers::dynamic_array<cpu_info> cpus;
 
 		REQUIRE(system::query_cpu_info(cpus));
-		REQUIRE(containers::get_count(cpus) > 0);
+		REQUIRE(buffers::get_count(cpus) > 0);
 
-		auto cpu_info = containers::at(cpus, 0);
+		auto cpu_info = buffers::get(cpus, 0);
 		REQUIRE(cpu_info.physical_cores >= 1);
 		REQUIRE(cpu_info.logical_processors >= 1);
 

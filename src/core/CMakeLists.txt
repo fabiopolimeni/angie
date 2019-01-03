@@ -98,7 +98,19 @@ else() # default system alloctor
     message(STATUS "Memory manager: system")
 endif()
 
-# System - plibsys
+# String
+set(SOURCE_STRING_FILES "")
+if (angie_string_stb)
+    list(APPEND SOURCE_STRING_FILES strings/impl/stb/string_stb.cpp)
+	target_include_directories(angie_core PRIVATE ../../externals/stb)
+    message(STATUS "String: stb")
+elseif(angie_string_sds)
+    list(APPEND SOURCE_STRING_FILES strings/impl/sds/string_sds.cpp)
+	target_include_directories(angie_core PRIVATE ../../externals/sds)
+    message(STATUS "String: sds")
+endif()
+
+# System
 set(SOURCE_SYSTEM_FILES "")
 if (angie_system_plibsys)
     list(APPEND SOURCE_SYSTEM_FILES
@@ -167,6 +179,7 @@ target_sources(angie_core PRIVATE ${COMPILATION_FILES})
 
 target_sources(angie_core PRIVATE ${SOURCE_DEBUG_FILES})
 target_sources(angie_core PRIVATE ${SOURCE_MEMORY_FILES})
+target_sources(angie_core PRIVATE ${SOURCE_STRING_FILES})
 target_sources(angie_core PRIVATE ${SOURCE_SYSTEM_FILES})
 target_sources(angie_core PRIVATE ${SOURCE_CPU_FILES})
 

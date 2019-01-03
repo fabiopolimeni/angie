@@ -31,3 +31,9 @@
 [submodule "externals/sds"]
 	path = externals/sds
 	url = https://github.com/antirez/sds.git
+[submodule "externals/tiny-regex-c"]
+	path = externals/tiny-regex-c
+	url = https://github.com/kokke/tiny-regex-c.git
+[submodule "externals/utf8proc"]
+	path = externals/utf8proc
+	url = https://github.com/JuliaStrings/utf8proc.git
