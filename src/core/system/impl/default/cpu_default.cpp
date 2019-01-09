@@ -15,8 +15,7 @@ namespace angie {
 				// DynamicIQ or NUMA implementation.
 				cpu_info cpu = {
 					0,							// Id
-					"Vendor unknown",			// Vendor
-					"Arch unknown",				// Architecture
+					"Unknown CPU",				// Unknown
 					1, 							// Cores
 					2							// Logical Processors
 				};

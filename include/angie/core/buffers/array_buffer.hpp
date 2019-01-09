@@ -36,7 +36,7 @@ namespace angie {
 			 * @param arr Array object to query
 			 * @return Number of elements in the array
 			 */
-			constexpr inline types::size compute_capacity(types::size count) {
+			inline types::size compute_capacity(types::size count) {
 				return count ? utils::next_power_of_two(count) : 0;
 			}
 

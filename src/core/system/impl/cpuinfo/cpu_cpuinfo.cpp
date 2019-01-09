@@ -185,7 +185,7 @@ namespace angie {
 			}
 
 			void release_cpu_info(containers::dynamic_array<cpu_info>& cpus) {
-				// Release memory allocaed to get cpu information
+				// Release memory allocated to get cpu information
 				cpuinfo_deinitialize();
 				containers::release(cpus);
 			}

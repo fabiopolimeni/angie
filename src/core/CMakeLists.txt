@@ -47,7 +47,7 @@ if (angie_debug_tools)
 
 	# callstack symbol
 	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-		set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -rdynamic")
+		#set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -rdynamic")
 	elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	# using GCC
 	elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
@@ -59,6 +59,11 @@ if (angie_debug_tools)
     set_source_files_properties(${DBGTOOLS_DIR_SRC}/assert.cpp
 		PROPERTIES
 		COMPILE_DEFINITIONS DBG_TOOLS_ASSERT_ENABLE
+		LANGUAGE CXX)
+
+	set_source_files_properties(${DBGTOOLS_DIR_SRC}/callstack.cpp
+		PROPERTIES
+		COMPILE_DEFINITIONS _CRT_SECURE_NO_WARNINGS
 		LANGUAGE CXX)
 
     list(APPEND SOURCE_DEBUG_FILES

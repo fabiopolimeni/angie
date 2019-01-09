@@ -60,22 +60,26 @@ int main(int32_t argc, char* argv[]) {
         false					// callstack on exit
     };
 
-    report::init(sets);
+	report::init(sets);
+	
+	const auto core_string = strings::format(
+		"Main Thread executes on processor: %d",
+		angie::core::system::get_current_processor());
+
+	report::info(core_string);
 
     containers::dynamic_array<cpu_info> cpus;
-    
     if (system::query_cpu_info(cpus)) {
 		// Print out all cpus found on this device
 		for (uint64_t i = 0; i < buffers::get_count(cpus); ++i) {
 			// E.g. Brand name @ GHz (Cores/Processors)
 			const auto& cpu = buffers::get(cpus, i);
-			ansi_string cpu_string = strings::format("%s @ %dHz (%d/%d)",
+			const auto cpu_string = strings::format("%s @ %dHz (%d/%d)",
 				cpu.brand_name, cpu.frequency,
 				cpu.physical_cores, cpu.logical_processors
 			);
 
 			report::info(cpu_string);
-			containers::release(cpu_string);
 		}
 
 		system::release_cpu_info(cpus);
