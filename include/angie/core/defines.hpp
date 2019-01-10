@@ -349,11 +349,13 @@
  * ...
  * }
  */
-#define angie_defined(macro) IS_DEFINED_(macro)
+#define angie_is_defined(macro) IS_DEFINED_(macro)
 #define MACROTEST_1 ,
 #define IS_DEFINED_(value) IS_DEFINED__(MACROTEST_##value)
 #define IS_DEFINED__(comma) IS_DEFINED___(comma 1, 0)
 #define IS_DEFINED___(_, v, ...) v
+
+#define angie_is_pow2(x) (x && !(x & (x - 1)))
 
 #ifdef __cplusplus
 #   ifndef restrict

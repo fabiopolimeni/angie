@@ -57,11 +57,20 @@ namespace angie {
 
 			/**
 			 * Format a string from the given arguments.
-			 * Formatting rules are the same as the C
-			 * standard library `sprintf`.
+			 * Formatting rules are the same as the C standard library.
 			 * 
-			 * @param msg String to format.
-			 * @return Formatted string.
+			 * @note: This function returns a global string allocated
+			 * in thread space. Even though you can't manipulate the
+			 * memory returned, you maybe tempted to pass the returned
+			 * reference to another thread. This can result in unexpected
+			 * results, as the memory referenced by the resulted string
+			 * can be changed underneath by the thread who owns the memory.
+			 * Therefore, if you want to use the string outside the scope
+			 * of the current thread who has generated the string, copy
+			 * its content into a new string object and use that instead.
+			 * 
+			 * @param msg String to format
+			 * @return Formatted string
 			 */
 			const ansi_string& format(const types::char8* fmt, ...);
 

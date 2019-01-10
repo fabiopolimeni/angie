@@ -299,15 +299,17 @@ namespace angie {
 			 * @param elem New element to overwrite with
 			 * @param from Position where starting to overwrite from
 			 * @param num Number of elements to overwrite
-			 * @return true if successful, false otherwise
+			 * @return The number of elements set
 			 */
 			template <typename T>
-			inline types::boolean set(array_buffer<T>& dst, T elem,
+			inline types::size set(array_buffer<T>& dst, T elem,
 				types::uintptr from, types::size num = 1) {
 				angie_assert(from < get_count(dst));
 
 				auto count = algorithm::min(from + num, get_count(dst));
-				while (from < count) {
+				auto index = from;
+				while (index < count && 
+					memory::copy(get_data(dst) + index, &elem, sizeof(T))) {
 					// We could use the assignment/copy contructor here.
 					// Although, if the given POD object includes some
 					// member declared const, the compiler will return an
@@ -317,15 +319,10 @@ namespace angie {
 					// remove as much as possible the common boilerplate code
 					// usually necessary for C++ type definition, we simply
 					// copy the memory.
-					//dst.data[from++] = elem;
-					if (!memory::copy(get_data(dst) + from, &elem, sizeof(T))) {
-						return false;
-					}
-
-					++from;
+					++index;
 				}
 
-				return true;
+				return index - from;
 			}
 
 			/**
@@ -389,7 +386,7 @@ namespace angie {
 			 * @param dst Array to operate on
 			 * @param from Position where starting to replace from
 			 * @param num Number of elements to remove
-			 * @return The number of replace elements
+			 * @return The number of replaced elements
 			 */
 			template <typename T>
 			inline types::size replace_with_last(array_buffer<T>& dst,
@@ -430,16 +427,16 @@ namespace angie {
 			 * @param n_bytes Number of bytes to write
 			 * @param dst Destination buffer
 			 * @param at Position where starting to write from
-			 * @return true if successful, false otherwise
+			 * @return The number of written bytes
 			 */
 			template <typename T>
-			inline types::boolean write(const void* src, types::size n_bytes,
+			inline types::size write(const void* src, types::size n_bytes,
 				array_buffer<T>& dst, types::uintptr at = 0) {
 				angie_assert(src, "Source buffer must be valid");
 				angie_assert(at < get_count(dst));
 				angie_assert(n_bytes <= buffers::compute_size<T>(get_count(dst) - at));
 
-				return !!(memory::copy(get_data(dst) + at, src, n_bytes));
+				return memory::copy(get_data(dst) + at, src, n_bytes);
 			}
 
         }

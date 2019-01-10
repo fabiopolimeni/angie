@@ -15,8 +15,7 @@ namespace angie {
         namespace memory {
 
             types::size copy(void* ANGIE_RESTRICT dst,
-                             const void* ANGIE_RESTRICT src,
-                             types::size bytes) {
+                const void* ANGIE_RESTRICT src, types::size bytes) {
                 angie_assert((static_cast<types::byte*>(dst) + bytes <= src)
 					|| (static_cast<const types::byte*>(src) + bytes <= dst),
                     "Destination range overlaps the source buffer");
@@ -29,8 +28,7 @@ namespace angie {
             }
 
             types::size move(void* ANGIE_RESTRICT dst,
-                             const void* ANGIE_RESTRICT src,
-                             types::size bytes) {
+                const void* ANGIE_RESTRICT src, types::size bytes) {
 				angie_assert((static_cast<types::byte*>(dst) + bytes <= src)
 					|| (static_cast<const types::byte*>(src) + bytes <= dst),
 					"Destination range overlaps the source buffer");

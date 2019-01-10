@@ -71,7 +71,7 @@ int main(int32_t argc, char* argv[]) {
     containers::dynamic_array<cpu_info> cpus;
     if (system::query_cpu_info(cpus)) {
 		// Print out all cpus found on this device
-		for (uint64_t i = 0; i < buffers::get_count(cpus); ++i) {
+		for (types::size i = 0; i < buffers::get_count(cpus); ++i) {
 			// E.g. Brand name @ GHz (Cores/Processors)
 			const auto& cpu = buffers::get(cpus, i);
 			const auto cpu_string = strings::format("%s @ %dHz (%d/%d)",

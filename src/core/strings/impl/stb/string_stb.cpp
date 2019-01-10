@@ -90,7 +90,7 @@ namespace angie {
 
 			const ansi_string& format(const types::char8* fmt, ...) {
 				if (ansi::g_format_string == nullptr) {
-					// This string will be allocated on a thread stack
+					// This string will be allocated on the thread stack
 					ansi::g_format_string = const_cast<ansi_string*>(
 						ansi::create_string(ANGIE_MAX_FORMAT_CHARS,
 						ansi::g_thread_format_alloc));

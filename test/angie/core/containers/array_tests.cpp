@@ -175,10 +175,8 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 			u32_a.data[i] = i;
 		}
 
-		types::size n_removed = 0;
-
 		// [0,1,4,5,6]
-		REQUIRE(containers::remove(u32_a, 2, 2, n_removed));
+		REQUIRE(containers::remove(u32_a, 2, 2) == 2);
 		REQUIRE(u32_a.count == 5);
 		REQUIRE(u32_a.capacity == 8);
 		REQUIRE(u32_a.data[0] == 0u);
@@ -188,11 +186,11 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		REQUIRE(u32_a.data[4] == 6u);
 
 		// [0,1,4]
-		REQUIRE(containers::remove(u32_a, 3, 3, n_removed));
+		REQUIRE(containers::remove(u32_a, 3, 3) == 2);
 		REQUIRE(u32_a.count == 3);
 
 		// [1,4]
-		REQUIRE(containers::remove(u32_a, 0, 1, n_removed));
+		REQUIRE(containers::remove(u32_a, 0, 1) == 1);
 		REQUIRE(u32_a.count == 2);
 		REQUIRE(u32_a.capacity == 8);
 		REQUIRE(u32_a.data[0] == 1u);
@@ -213,22 +211,22 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 
 		// [0,1,2,6,7,5]
 		types::uint8 a1[] = { 0, 1, 2, 6, 7, 5 };
-		REQUIRE(containers::replace_with_last(u8_a, 3, 2));
+		REQUIRE(containers::remove_fuzzy(u8_a, 3, 2) == 2);
 		REQUIRE(u8_a.count == 6);
 		REQUIRE(memory::is_equal(a1, u8_a.data, 6));
 
 		// [0,1,2,6]
-		REQUIRE(containers::replace_with_last(u8_a, 4, 3));
+		REQUIRE(containers::remove_fuzzy(u8_a, 4, 3) == 2);
 		REQUIRE(u8_a.count == 4);
 		REQUIRE(memory::is_equal(a1, u8_a.data, 4));
 
 		// [0,6]
-		REQUIRE(containers::replace_with_last(u8_a, 1, 2));
+		REQUIRE(containers::remove_fuzzy(u8_a, 1, 2) == 2);
 		REQUIRE(u8_a.count == 2);
 		REQUIRE(u8_a.data[0] == 0);
 		REQUIRE(u8_a.data[1] == 6);
 
-		REQUIRE(containers::replace_with_last(u8_a, 0, 4));
+		REQUIRE(containers::remove_fuzzy(u8_a, 0, 4) == 2);
 		REQUIRE(buffers::is_empty(u8_a));
 
 		containers::release(u8_a);

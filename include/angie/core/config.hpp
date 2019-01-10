@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "angie/core/defines.hpp"
+
 /**
  * Configuration settings.
  *
@@ -54,3 +56,5 @@
 #ifndef ANGIE_MAX_FORMAT_CHARS
 #define ANGIE_MAX_FORMAT_CHARS 1024
 #endif // ANGIE_MAX_FORMAT_CHARS
+static_assert(angie_is_pow2(ANGIE_MAX_FORMAT_CHARS),
+    "ANGIE_MAX_FORMAT_CHARS must be power of 2");

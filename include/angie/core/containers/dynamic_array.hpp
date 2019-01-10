@@ -403,20 +403,17 @@ namespace angie {
 			 * @param dst Array to operate on
 			 * @param from Position where starting the removal from
 			 * @param num Number of elements to remove
-			 * @return true if successful, false otherwise
+			 * @return The number of removed elements
 			 */
 			template <typename T>
-			inline types::boolean remove(dynamic_array<T>& dst,
-				types::uintptr from, types::size num, types::size& removed) {
+			inline types::size remove(dynamic_array<T>& dst,
+				types::uintptr from, types::size num) {
 				angie_assert(from < buffers::get_count(dst));
-				
-				const auto end_index = get_count(dst);
-				auto n_to_remove = algorithm::min(num, end_index - from);
 
-				removed = buffers::left_shift(dst, from, num);
-				dst.count -= removed;
+				auto n_removed = buffers::left_shift(dst, from, num);
+				dst.count -= n_removed;
 
-				return removed == n_to_remove;
+				return n_removed;
 			}
 
 			/**
@@ -428,35 +425,23 @@ namespace angie {
 			 * want to remove, with the last `num`. Because of this assumption
 			 * it may result in a faster operation than `remove()`, as it does
 			 * not have to overwrite empty positions with a reverse loop.
-			 * This function does not reallocate memory in any how.
+			 * This function does not reallocate memory.
 			 *
 			 * @tparam T POD type
 			 * @param dst Array to operate on
 			 * @param from Position where starting to replace from
 			 * @param num Number of elements to remove
-			 * @return true if successful, false otherwise
+			 * @return The number of removed elements
 			 */
 			template <typename T>
-			inline types::boolean replace_with_last(dynamic_array<T>& dst,
+			inline types::size remove_fuzzy(dynamic_array<T>& dst,
 				types::uintptr from, types::size num) {
 				angie_assert(from < buffers::get_count(dst));
 
-				// Prevent memory override
-				auto n_to_remove = algorithm::min(num, buffers::get_count(dst) - from);
+				auto n_removed = buffers::replace_with_last(dst, from, num);
+				dst.count -= n_removed;
 
-				// Following calculations are needed in order to
-				// guarantee not to move overlapping memory chunks.
-				auto move_from = algorithm::max(
-					buffers::get_count(dst) - n_to_remove, from + n_to_remove);
-				
-				// Move manipulator can't cope with zero size either
-				if (auto n_to_move = buffers::get_count(dst) - move_from) {
-					memory::move(buffers::get_data(dst) + from, buffers::get_data(dst) + move_from,
-						buffers::compute_size<T>(n_to_move));
-				}
-
-				dst.count -= n_to_remove;
-				return true;
+				return n_removed;
 			}
 
 			/**
@@ -501,10 +486,10 @@ namespace angie {
 			 * @param src Source array to copy data from
 			 * @param from Position where starting to copy from
 			 * @param num Number of elements to copy
-			 * @return true if successful, false otherwise
+			 * @return The number of copied elements
 			 */
 			template <typename T, typename U>
-			inline types::boolean copy(dynamic_array<T>& dst,
+			inline types::size copy(dynamic_array<T>& dst,
 				const dynamic_array<U>& src, types::uintptr from = 0,
 				types::size num = SIZE_MAX) {
                 static_assert(sizeof(T) == sizeof(U));
@@ -513,12 +498,15 @@ namespace angie {
 
 				auto count = algorithm::min(buffers::get_count(src) - from, num);
 				if (count && resize(dst, count)) {
-					return !!(memory::copy(buffers::get_data(dst), buffers::get_data(src) + from,
-						buffers::compute_size<T>(count)));
+					auto copied_bytes = memory::copy(
+						buffers::get_data(dst), buffers::get_data(src) + from,
+						buffers::compute_size<T>(count));
+
+					return buffers::compute_count<T>(copied_bytes);
 				}
 
 				// Do not consider zero size calls an error.
-				return false || count == 0;
+				return 0;
 			}
 			
 			/**
@@ -535,10 +523,10 @@ namespace angie {
 			 * @param src Source array to copy elements from
 			 * @param from Position where starting to copy from
 			 * @param num Number of elements to copy
-			 * @return true if successful, false otherwise
+			 * @return The number of copied elements
 			 */
 			template <typename T, typename U>
-			inline types::boolean insert(dynamic_array<T>& dst, types::uintptr at,
+			inline types::size insert(dynamic_array<T>& dst, types::uintptr at,
 				const dynamic_array<U>& src, types::uintptr from = 0,
 				types::size num = SIZE_MAX) {
                 static_assert(sizeof(T) == sizeof(U));
@@ -547,12 +535,14 @@ namespace angie {
 
 				auto n_to_copy = algorithm::min(buffers::get_count(src) - from, num);
 				if (n_to_copy && make_space(dst, at, n_to_copy)) {
-					return buffers::write(buffers::get_data(src) + from,
+					auto written_bytes = buffers::write(buffers::get_data(src) + from,
 						buffers::compute_size<T>(n_to_copy), dst, at);
+
+					return buffers::compute_count<T>(written_bytes);
 				}
 
 				// Do not consider a zero size copy an error
-				return false || n_to_copy == 0;
+				return 0;
 			}
 
 			/**
@@ -566,17 +556,13 @@ namespace angie {
 			 * @tparam U POD type
 			 * @param dst Destination array to grow
 			 * @param src Source array to copy elements from
-			 * @param from Position where starting to copy from
-			 * @param num Number of elements to copy
-			 * @return true if successful, false otherwise
+			 * @return The number of appended elements
 			 */
 			template <typename T, typename U>
-			inline types::boolean append(dynamic_array<T>& dst,
-				const dynamic_array<U>& src,
-				types::uintptr from = 0, types::size num = SIZE_MAX) {
+			inline types::size append(dynamic_array<T>& dst,
+				const dynamic_array<U>& src) {
 				static_assert(sizeof(T) == sizeof(U));
 				angie_assert(is_valid(dst));
-				angie_assert(from < src.count);
 
 				return insert(dst, buffers::get_count(dst), src);
 			}
@@ -590,10 +576,10 @@ namespace angie {
 			 * @param from Position where starting to remove from
 			 * @param num Number of elements to extract
 			 * @param dst Destination array to hold the extracted elements
-			 * @return true if successful, false otherwise
+			 * @return the number of extracted elements
 			 */
 			template <typename T, typename U>
-			inline types::boolean extract(
+			inline types::size extract(
 				dynamic_array<T>& dst, dynamic_array<U>& src,
 				types::uintptr from, types::size num) {
 				angie_assert(is_valid(src));
@@ -601,12 +587,11 @@ namespace angie {
 
 				// Copy from an array to another
 				if (copy(dst, src, from, num)) {
-					types::size removed = 0;
 					// Remove those elements that have been copied
-					return remove(src, from, num, removed);
+					return remove(src, from, num);
 				}
 				
-				return false;
+				return 0;
 			}
 
 			/**
@@ -627,7 +612,6 @@ namespace angie {
 
 				const auto count = buffers::get_count(dst);
 				if (resize(dst, count + 1)) {
-					
 					if (!memory::copy(buffers::get_data(dst) + count, &elem, sizeof(T))) {
 						return false;
 					}
@@ -657,7 +641,6 @@ namespace angie {
 				angie_assert(is_valid(dst));
 
 				if (const auto count = buffers::get_count(dst) > 0) {
-					
 					//elem = at(dst, count - 1);
 					if (!memory::copy(&elem, buffers::get_data(dst) + count - 1, sizeof(T))) {
 						return false;
