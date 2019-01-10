@@ -11,16 +11,16 @@
 #define STB_SPRINTF_IMPLEMENTATION
 #include "stb_sprintf.h"
 
-namespace ansi {
+namespace {
 
 	using namespace angie::core;
 	using namespace angie::core::strings;
 
-	thread_local ansi_string* g_format_string = nullptr;
+	thread_local dynamic_string<types::char8>* g_format_string = nullptr;
 	
 	alignas(ANGIE_DEFAULT_MEMORY_ALIGNMENT)
 	thread_local types::char8 g_format_heap[
-		sizeof(ansi_string) + ANGIE_MAX_FORMAT_CHARS] = {0};
+		sizeof(dynamic_string<types::char8>) + ANGIE_MAX_FORMAT_CHARS] = {0};
 
 	void* format_alloc(types::size size, types::size alignment) {
 		return g_format_heap;
@@ -88,16 +88,16 @@ namespace angie {
     namespace core {
         namespace strings {
 
-			const ansi_string& format(const types::char8* fmt, ...) {
-				if (ansi::g_format_string == nullptr) {
+			const dynamic_string<types::char8>& format(const types::char8* fmt, ...) {
+				if (g_format_string == nullptr) {
 					// This string will be allocated on the thread stack
-					ansi::g_format_string = const_cast<ansi_string*>(
-						ansi::create_string(ANGIE_MAX_FORMAT_CHARS,
-						ansi::g_thread_format_alloc));
+					g_format_string = const_cast<dynamic_string<types::char8>*>(
+						create_string(ANGIE_MAX_FORMAT_CHARS,
+						g_thread_format_alloc));
 				}
 					
-				ansi_string& string_result = *(ansi::g_format_string);
-                if (ansi::g_format_string) {
+				dynamic_string<types::char8>& string_result = *(g_format_string);
+                if (g_format_string) {
                     va_list list;
                     va_start(list, fmt);
 					

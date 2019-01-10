@@ -183,6 +183,32 @@ namespace angie {
 			}
 
 			/**
+			 * Get the size in bytes used by the given
+			 * array to accommodate its elements.
+			 *
+			 * @tparam T POD type
+			 * @param arr Array object to query
+			 * @return Bytes used to accommodate elements
+			 */
+			template <typename T>
+			inline types::size get_size(const array_buffer<T>& arr) {
+				return buffers::compute_size<T>(arr.count);
+			}
+
+			/**
+			 * Get the amount of memory, in bytes, used by the
+			 * array to accommodate the whole array capacity.
+			 *
+			 * @tparam T POD type
+			 * @param arr Array object to query
+			 * @return Bytes used to accommodate array's capacity
+			 */
+			template <typename T>
+			inline types::size get_footprint(const array_buffer<T>& arr) {
+				return buffers::compute_size<T>(arr.capacity);
+			}
+
+			/**
 			 * Whether two arrays are considered equal or not.
 			 *
 			 * @tparam T POD type

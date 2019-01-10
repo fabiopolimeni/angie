@@ -14,7 +14,7 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 
 	SECTION("Init strings") {
         int16_t number = 6993;
-		ansi_string fmt_string = format("number=%d", number);
+		utf8_string fmt_string = format("number=%d", number);
 
 		REQUIRE(true);
 	}

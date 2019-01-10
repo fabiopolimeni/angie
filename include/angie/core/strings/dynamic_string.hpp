@@ -43,17 +43,33 @@ namespace angie {
 			}
 
 			/**
-			 * Get the length of the string.
-			 */
-			template <typename T>
-			inline types::size length(const dynamic_string<T>& str) {
-				return buffers::get_count(str);
-			}
-
-			/**
-			 * ANSI string
+			 * ANSI string.
+			 * 
+			 * Each character is represented by 1 byte only.
+			 * ANSI is not really a standard, as it may end
+			 * up using all 256 possible characters. Although,
+			 * the first 127 are standardized in the ASCII,
+			 * the second half depend on the encoding. Still,
+			 * each character is made of 1 single byte.
 			 */
 			using ansi_string = dynamic_string<types::char8>;
+
+			/**
+			 * UTF8 string.
+			 * 
+			 * UTF8 strings can require multiple bytes to 
+			 * represent a single character. This string
+			 * representation is one of the Unicode ones,
+			 * and its main difference from simpler ANSI
+			 * strings is the fact that can have a variable
+			 * size per represented character. Therefore,
+			 * getting the length of a utf8_string can
+			 * greatly differ from its simpler counterpart
+			 * ANSI string, and can take considerably longer
+			 * time to compute. Nevertheless, keep in mind
+			 * that a ASCII string is also a valid UTF8 string.
+			 */
+			using utf8_string = dynamic_string<types::char8>;
 
 			/**
 			 * Format a string from the given arguments.
@@ -66,18 +82,13 @@ namespace angie {
 			 * results, as the memory referenced by the resulted string
 			 * can be changed underneath by the thread who owns the memory.
 			 * Therefore, if you want to use the string outside the scope
-			 * of the current thread who has generated the string, copy
-			 * its content into a new string object and use that instead.
+			 * of the current executing thread, copy its content into a
+			 * new string object and use that instead.
 			 * 
 			 * @param msg String to format
 			 * @return Formatted string
 			 */
-			const ansi_string& format(const types::char8* fmt, ...);
-
-			/**
-			 * UTF8 string
-			 */
-			using utf8_string = dynamic_string<types::char8>;
+			const dynamic_string<types::char8>& format(const types::char8* fmt, ...);
             
         }
     }
