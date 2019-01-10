@@ -15,15 +15,6 @@ namespace angie {
 		namespace buffers {
 
 			/**
-			 * Pointer helpers.
-			 */
-			enum class index : types::uintptr {
-				begin = 0,			/*!< Identifies the origin of the array */
-				end = SIZE_MAX,		/*!< Identifies the end of the array */
-				none = end			/*!< Identifies and invalid index */
-			};
-
-			/**
 			 * Compute the capacity from the given size.
 			 *
 			 * We don't need to hold a variable, because we can compute it
@@ -457,12 +448,106 @@ namespace angie {
 			 */
 			template <typename T>
 			inline types::size write(const void* src, types::size n_bytes,
-				array_buffer<T>& dst, types::uintptr at = 0) {
+				array_buffer<T>& dst, types::uintptr from = begin_ptr) {
 				angie_assert(src, "Source buffer must be valid");
-				angie_assert(at < get_count(dst));
-				angie_assert(n_bytes <= buffers::compute_size<T>(get_count(dst) - at));
+				angie_assert(from < get_count(dst));
+				angie_assert(n_bytes <= buffers::compute_size<T>(get_count(dst) - from));
 
-				return memory::copy(get_data(dst) + at, src, n_bytes);
+				return memory::copy(get_data(dst) + from, src, n_bytes);
+			}
+
+			/**
+			 * Search in the src buffer for the first occurrence of the whole pattern.
+			 * 
+			 * The function will start at `from` walking forward, towards the tail
+			 * of the buffer. If the given pattern is found, it will return the index
+			 * inside `src` where the pattern has been firstly found.
+			 * This function accepts a raw buffer, as it will be easier to manage
+			 * and interact with third-party libraries
+			 * 
+			 * @param pattern Raw buffer pattern to look for
+			 * @param num Number of items in the pattern raw buffer
+			 * @param src The array where to look for the given pattern
+			 * @param from Initial position where to start looking from
+			 * @return The first index inside `src` where the whole `pattern`
+			 * 		has been found, types::end_ptr if there is no match.
+			 */
+			template <typename T>
+			inline types::uintptr find_first(const T* pattern, types::size num,
+				const array_buffer<T>& src, types::uintptr from = begin_ptr) {
+				angie_assert(pattern, "Source pattern must be valid");
+				angie_assert(num, "Number of items must be greater than 0");
+
+				const types::size check_size = compute_size<T>(num);
+
+				// If the number of items in the pattern is greater than
+				// the number of elements left to seach in the source array,
+				// then, this is the end of the searching algorithm.
+				const auto src_count = buffers::get_count(src);
+				const auto* src_data = buffers::get_data(src);
+				while (from < src_count && src_count - from >= num) {
+					if (memory::is_equal(pattern, src_data + from, check_size)) {
+						return from;
+					}
+
+					// We can only advance one position at a time
+					++from;
+				}
+
+				// If we reach this point, then, there is
+				// no matching pattern in the source array.
+				return not_found;
+			}
+
+			/**
+			 * Search in the src buffer for the last occurrence of the whole pattern.
+			 * 
+			 * The function will start at `from` walking backward, towards the head
+			 * of the buffer. If the given pattern is found, it will return the index
+			 * inside `src` where the pattern has been lastly found.
+			 * This function accepts a raw buffer, as it will be easier to manage
+			 * and interact with third-party libraries
+			 * 
+			 * @param pattern Raw buffer pattern to look for
+			 * @param num Number of items in the pattern raw buffer
+			 * @param src The array where to look for the given pattern
+			 * @param from Initial position where to start looking from
+			 * @return The last index inside `src` where the whole `pattern` 
+			 * 		has been found, types::end_ptr if there is no match.
+			 */
+			template <typename T>
+			inline types::uintptr find_last(const T* pattern, types::size num,
+				const array_buffer<T>& src, types::uintptr from = end_ptr) {
+				angie_assert(pattern, "Source pattern must be valid");
+				angie_assert(num, "Number of items must be greater than 0");
+
+				// Early exit if the source array is empty
+				const auto src_count = buffers::get_count(src);
+				if (src_count == 0){
+					return not_found;
+				}
+
+				const types::size check_size = compute_size<T>(num);
+
+				// Clamp the starting position from the last position available.
+				// @note: from = algorithm::min(from - 1, src_count) would lead
+				// to overflow condition, because `from` can already be set to 
+				// the maximum number allowed by its type representation.
+				from = algorithm::min(from, src_count - 1) + 1;
+				const auto* src_data = buffers::get_data(src);
+				while (from >= num) {
+					const auto start_ptr = src_data + from - num;
+					if (memory::is_equal(pattern, start_ptr, check_size)) {
+						return from - num;
+					}
+
+					// We can only step back one position at a time
+					--from;
+				}
+
+				// If we reach this point, then, there is
+				// no matching pattern in the source array.
+				return not_found;
 			}
 
         }

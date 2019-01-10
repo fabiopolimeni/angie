@@ -49,7 +49,7 @@ namespace angie {
 			 * @tparam T Element type (POD)
 			 * @param arr Array object
 			 * @return true if all properties of the structure are consistent
-			 * false otherwise.
+			 * 		false otherwise.
 			 */
 			template <typename T>
 			inline state get_state(const dynamic_array<T>& arr) {
@@ -154,9 +154,9 @@ namespace angie {
 			 * @tparam T POD type
 			 * @param dst Object array to initialise
 			 * @param num Initial capacity. It will be ceil-ed to the next
-			 * 	power of two value.
+			 * 		power of two value.
 			 * @return true if the array has been successfully initialised,
-			 * false otherwise.
+			 * 		false otherwise.
 			 */
 			template <typename T>
 			inline types::boolean init(dynamic_array<T>& arr, types::size num = 0) {
@@ -317,8 +317,8 @@ namespace angie {
 
 				auto new_size = buffers::get_count(dst) + num;
 
-				// Because we want to insert uninitialized elements if starting
-				// from a point which would overflow otherwise, then, adjust for
+				// Because we want to insert uninitialized elements starting
+				// at a point which would overflow otherwise, adjust for the
 				// new size, taking into account the resulting padding.
 				if (from > buffers::get_count(dst)) {
 					new_size += from - buffers::get_count(dst);
@@ -340,7 +340,8 @@ namespace angie {
 						auto begin = end - count;
 						while (count > 0) {
 							// Move as much as memory in one call
-							memory::move(buffers::get_data(dst) + end, buffers::get_data(dst) + begin,
+							memory::move(buffers::get_data(dst) + end,
+								buffers::get_data(dst) + begin,
 								buffers::compute_size<T>(count));
 							
 							auto diff = algorithm::min(count, begin - from);
@@ -393,11 +394,11 @@ namespace angie {
 			 * Elements will be kept in the order they were before the removal.
 			 * 
 			 * @note: Memory `move` or `copy` cannot operate on overlapping buffers.
-			 * Because this can be the case while manipulate array's memory this
-			 * algorithm cannot take advantage of such manipulators.
+			 * 		Because this can be the case while manipulate array's memory this
+			 * 		algorithm cannot take advantage of such manipulators.
 			 * 
 			 * @note: Copy constructor, or assignment, won't be called here,
-			 * memory will be copied directly from the given object instead.
+			 * 		memory will be copied directly from the given object instead.
 			 *
 			 * @tparam T POD type
 			 * @param dst Array to operate on
@@ -459,15 +460,15 @@ namespace angie {
 			 * @return true if successful, false otherwise
 			 */
 			template <typename T>
-			inline types::boolean from_buffer(const void* src, types::size n_bytes,
-				dynamic_array<T>& dst, types::uintptr at = 0) {
+			inline types::size from_buffer(const void* src, types::size n_bytes,
+				dynamic_array<T>& dst, types::uintptr at = begin_ptr) {
 				angie_assert(src, "Source buffer must be not-null");
 				
 				if (n_bytes && make_space(dst, at, buffers::compute_count<T>(n_bytes))) {
-					return !!(memory::copy(buffers::get_data(dst) + at, src, n_bytes));
+					return memory::copy(buffers::get_data(dst) + at, src, n_bytes);
 				}
 				
-				return false;
+				return 0;
 			}
 
 			/**
@@ -490,7 +491,7 @@ namespace angie {
 			 */
 			template <typename T, typename U>
 			inline types::size copy(dynamic_array<T>& dst,
-				const dynamic_array<U>& src, types::uintptr from = 0,
+				const dynamic_array<U>& src, types::uintptr from = begin_ptr,
 				types::size num = SIZE_MAX) {
                 static_assert(sizeof(T) == sizeof(U));
 				angie_assert(from < buffers::get_count(src));
@@ -527,7 +528,7 @@ namespace angie {
 			 */
 			template <typename T, typename U>
 			inline types::size insert(dynamic_array<T>& dst, types::uintptr at,
-				const dynamic_array<U>& src, types::uintptr from = 0,
+				const dynamic_array<U>& src, types::uintptr from = begin_ptr,
 				types::size num = SIZE_MAX) {
                 static_assert(sizeof(T) == sizeof(U));
 				angie_assert(is_valid(dst));
@@ -598,13 +599,13 @@ namespace angie {
 			 * Add one element at the end of the array.
 			 * 
 			 * @note: Copy constructor, or assignment, won't be called here,
-			 * memory will be copied directly from the given object instead.
+			 * 		memory will be copied directly from the given object instead.
 			 *
 			 * @tparam T POD type
 			 * @param dst Source array to add the element to
 			 * @param elem Element to add
 			 * @return true if the element has been successfully added to the
-			 *         array, false otherwise.
+			 *  	array, false otherwise.
 			 */
 			template <typename T>
 			inline types::boolean push(dynamic_array<T>& dst, T elem) {
@@ -628,13 +629,13 @@ namespace angie {
 			 * If the function fails, the given variable will be left untouched.
 			 * 
 			 * @note: Copy constructor, or assignment, won't be called here,
-			 * memory will be copied directly from the given object instead.
+			 * 		memory will be copied directly from the given object instead.
 			 *
 			 * @tparam T POD type
 			 * @param dst Source array to add the element to
 			 * @param elem Variable that will hold the element removed
 			 * @return true if the element has been successfully removed to the
-			 * array, false otherwise.
+			 * 		array, false otherwise.
 			 */
 			template <typename T>
 			inline types::boolean pop(dynamic_array<T>& dst, T& elem) {
@@ -642,7 +643,8 @@ namespace angie {
 
 				if (const auto count = buffers::get_count(dst) > 0) {
 					//elem = at(dst, count - 1);
-					if (!memory::copy(&elem, buffers::get_data(dst) + count - 1, sizeof(T))) {
+					if (!memory::copy(&elem,
+						buffers::get_data(dst) + count - 1, sizeof(T))) {
 						return false;
 					}
 
@@ -651,6 +653,62 @@ namespace angie {
 				}
 
 				return false;
+			}
+
+			/**
+			 * Find all occurrences of the given pattern in the `src` array.
+			 * If any match is found the `indices` array is filled with the
+			 * positions at which the pattern has been found. This function
+			 * will walk forward starting at `from` index.
+			 * 
+			 * @note Repeating patterns can have overlapping ranges.
+			 * 		E.g. The pattern "ABAB" in a source array such "ABABAB"
+			 * 		will be reported twice, at position 0 and position 2.
+			 * 
+			 * @param indices The result array fulfilled with the positions
+			 * 		where the matching pattern has been found
+			 * @param pattern Raw buffer pattern to look for
+			 * @param length Number of items in the pattern raw buffer
+			 * @param src The array where to look for the given pattern
+			 * @param from The position where to start looking from
+			 * @return The number of matching occurrences
+			 */
+			template <typename T>
+			inline types::size find_forward(dynamic_array<types::uintptr>& indices,
+				const T* pattern, types::size length, const dynamic_array<T>& src,
+				types::uintptr from = begin_ptr) {
+				angie_assert(pattern, "Source pattern cannot be null");
+				angie_assert(length, "The length of the pattern must be > 0");
+				
+				return 0;
+			}
+
+			/**
+			 * Find all occurrences of the given pattern in the `src` array.
+			 * If any match is found the `indices` array is filled with the
+			 * positions at which the pattern has been found. This function
+			 * will walk backward starting at `from` index.
+			 * 
+			 * @note Repeating patterns can have overlapping ranges.
+			 * 		E.g. The pattern "ABAB" in a source array such "ABABAB"
+			 * 		will be reported twice, at position 0 and position 2.
+			 * 
+			 * @param indices The result array fulfilled with the positions
+			 * 		where the matching pattern has been found
+			 * @param pattern Raw buffer pattern to look for
+			 * @param length Number of items in the pattern raw buffer
+			 * @param src The array where to look for the given pattern
+			 * @param from The position where to start looking from
+			 * @return The number of matching occurrences
+			 */
+			template <typename T>
+			inline types::size find_backward(dynamic_array<types::uintptr>& indices,
+				const T* pattern, types::size length, const dynamic_array<T>& src,
+				types::uintptr from = begin_ptr) {
+				angie_assert(pattern, "Source pattern cannot be null");
+				angie_assert(length, "The length of the pattern must be > 0");
+				
+				return 0;
 			}
 			
 		}

@@ -330,4 +330,35 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 
 		containers::release(str_a);
 	}
+
+	SECTION("Find in buffer") {
+		containers::dynamic_array<types::char8> str_a;
+		REQUIRE(!!containers::from_buffer("Lore ipsum Lore opsum", 21, str_a));
+
+		REQUIRE(buffers::find_first("Lore", 4, str_a) == 0);
+		REQUIRE(buffers::find_first("sum", 3, str_a) == 7);
+		REQUIRE(buffers::find_first("ipsum", 3, str_a, 15) == not_found);
+		REQUIRE(buffers::find_last("sum", 3, str_a) == 18);
+		REQUIRE(buffers::find_last("sum", 3, str_a, 5) == not_found);
+
+		REQUIRE(!!containers::from_buffer("ababab", 6, str_a));
+		
+		containers::dynamic_array<types::uintptr> indices;
+
+		REQUIRE(containers::find_forward(indices, "a", 1, str_a) == 3);
+		REQUIRE(buffers::get(str_a, 0) == 0);
+		REQUIRE(buffers::get(str_a, 1) == 2);
+		REQUIRE(buffers::get(str_a, 2) == 4);
+
+		REQUIRE(containers::find_backward(indices, "b", 1, str_a, 4) == 2);
+		REQUIRE(buffers::get(str_a, 0) == 3);
+		REQUIRE(buffers::get(str_a, 1) == 1);
+
+		REQUIRE(containers::find_forward(indices, "abab", 4, str_a) == 2);
+		REQUIRE(buffers::get(str_a, 0) == 0);
+		REQUIRE(buffers::get(str_a, 1) == 2);
+
+		containers::release(str_a);
+		containers::release(indices);
+	}
 }

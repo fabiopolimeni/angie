@@ -72,15 +72,15 @@ namespace {
 	/**
 	 * Destroy the object allocated by `create(...)`.
 	 */
-	void destroy_string(ansi_string* str) {
-		if (str) {
-			str->allocator.free(str);
-		}
-	}
+	// void destroy_string(ansi_string* str) {
+	// 	if (str) {
+	// 		str->allocator.free(str);
+	// 	}
+	// }
 
-    char* stb_callback(char *buf, void *user, int len) {
-        return buf;
-    }
+    // char* stb_callback(char *buf, void *user, int len) {
+    //     return buf;
+    // }
 
 }
 
