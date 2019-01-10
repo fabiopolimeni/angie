@@ -105,6 +105,7 @@ endif()
 
 # String
 set(SOURCE_STRING_FILES "")
+list(APPEND SOURCE_STRING_FILES strings/impl/utf8_string.cpp)
 if (angie_string_stb)
     list(APPEND SOURCE_STRING_FILES strings/impl/stb/string_stb.cpp)
 	target_include_directories(angie_core PRIVATE ../../externals/stb)
@@ -175,7 +176,6 @@ else()
 	list(APPEND SOURCE_CPU_FILES system/impl/default/cpu_default.cpp)
 	message(STATUS "CPU info: default")
 endif()
-
 
 # Add source files
 target_sources(angie_core PUBLIC ${HEADER_FILES})

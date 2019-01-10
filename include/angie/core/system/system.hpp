@@ -16,7 +16,8 @@ namespace angie {
             {
                 ok,
                 unknown_system_error,
-                memory_manager_error
+                memory_manager_error,
+                locale_error
             };
             
             /**

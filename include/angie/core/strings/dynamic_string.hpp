@@ -58,16 +58,17 @@ namespace angie {
 			 * UTF8 string.
 			 * 
 			 * UTF8 strings can require multiple bytes to 
-			 * represent a single character. This string
-			 * representation is one of the Unicode ones,
-			 * and its main difference from simpler ANSI
-			 * strings is the fact that can have a variable
-			 * size per represented character. Therefore,
-			 * getting the length of a utf8_string can
-			 * greatly differ from its simpler counterpart
+			 * represent a single character (codepoint).
+			 * This string representation is one of the
+			 * Unicode ones, and its main difference from
+			 * simpler ANSI strings is the fact that can
+			 * have a variable size per represented character.
+			 * Therefore, getting the length of a utf8_string
+			 * can greatly differ from its simpler counterpart
 			 * ANSI string, and can take considerably longer
-			 * time to compute. Nevertheless, keep in mind
-			 * that a ASCII string is also a valid UTF8 string.
+			 * to compute. Nevertheless, keep in mind that
+			 * ASCII strings are, by definition, valid UTF8
+			 * strings too.
 			 */
 			using utf8_string = dynamic_string<types::char8>;
 

@@ -85,7 +85,6 @@ int main(int32_t argc, char* argv[]) {
 		system::release_cpu_info(cpus);
 	}
 
-	printf(u8"zß水🍌");
     system::shutdown();
     return EXIT_SUCCESS;
 }
