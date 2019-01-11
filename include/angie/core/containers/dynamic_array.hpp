@@ -8,6 +8,7 @@
 
 #include "angie/core/types.hpp"
 #include "angie/core/utils.hpp"
+#include "angie/core/constants.hpp"
 #include "angie/core/diagnostics/assert.hpp"
 #include "angie/core/algorithm.hpp"
 #include "angie/core/memory/allocator.hpp"
@@ -461,7 +462,7 @@ namespace angie {
 			 */
 			template <typename T>
 			inline types::size from_buffer(const void* src, types::size n_bytes,
-				dynamic_array<T>& dst, types::uintptr at = begin_ptr) {
+				dynamic_array<T>& dst, types::uintptr at = constants::begin_ptr) {
 				angie_assert(src, "Source buffer must be not-null");
 				
 				if (n_bytes && make_space(dst, at, buffers::compute_count<T>(n_bytes))) {
@@ -491,7 +492,7 @@ namespace angie {
 			 */
 			template <typename T, typename U>
 			inline types::size copy(dynamic_array<T>& dst,
-				const dynamic_array<U>& src, types::uintptr from = begin_ptr,
+				const dynamic_array<U>& src, types::uintptr from = constants::begin_ptr,
 				types::size num = SIZE_MAX) {
                 static_assert(sizeof(T) == sizeof(U));
 				angie_assert(from < buffers::get_count(src));
@@ -528,7 +529,7 @@ namespace angie {
 			 */
 			template <typename T, typename U>
 			inline types::size insert(dynamic_array<T>& dst, types::uintptr at,
-				const dynamic_array<U>& src, types::uintptr from = begin_ptr,
+				const dynamic_array<U>& src, types::uintptr from = constants::begin_ptr,
 				types::size num = SIZE_MAX) {
                 static_assert(sizeof(T) == sizeof(U));
 				angie_assert(is_valid(dst));
@@ -676,11 +677,31 @@ namespace angie {
 			template <typename T>
 			inline types::size find_forward(dynamic_array<types::uintptr>& indices,
 				const T* pattern, types::size length, const dynamic_array<T>& src,
-				types::uintptr from = begin_ptr) {
-				angie_assert(pattern, "Source pattern cannot be null");
-				angie_assert(length, "The length of the pattern must be > 0");
+				types::uintptr from = constants::begin_ptr) {
+				if (pattern == nullptr || length == 0) {
+					return 0;
+				}
 				
-				return 0;
+				const types::size check_size = buffers::compute_size<T>(length);
+				buffers::clear(indices, buffers::get_count(indices));
+
+				// If the number of items in the pattern is greater than
+				// the number of elements left to seach in the source array,
+				// then, this is the end of the searching algorithm.
+				const auto src_count = buffers::get_count(src);
+				const auto* src_data = buffers::get_data(src);
+				while (from < src_count && src_count - from >= length) {
+					if (memory::is_equal(pattern, src_data + from, check_size)) {
+						push(indices, from);
+					}
+
+					// We can only advance one position at a time
+					++from;
+				}
+
+				// If we reach this point, then, there is
+				// no matching pattern in the source array.
+				return buffers::get_count(indices);
 			}
 
 			/**
@@ -704,11 +725,39 @@ namespace angie {
 			template <typename T>
 			inline types::size find_backward(dynamic_array<types::uintptr>& indices,
 				const T* pattern, types::size length, const dynamic_array<T>& src,
-				types::uintptr from = begin_ptr) {
-				angie_assert(pattern, "Source pattern cannot be null");
-				angie_assert(length, "The length of the pattern must be > 0");
-				
-				return 0;
+				types::uintptr from = constants::end_ptr) {
+				if (pattern == nullptr || length == 0) {
+					return 0;
+				}
+
+				// Early exit if the source array is empty
+				const auto src_count = buffers::get_count(src);
+				if (src_count == 0){
+					return constants::not_found;
+				}
+
+				const types::size check_size = buffers::compute_size<T>(length);
+				buffers::clear(indices, buffers::get_count(indices));
+
+				// Clamp the starting position from the last position available.
+				// @note: from = algorithm::min(from - 1, src_count) would lead
+				// to overflow condition, because `from` can already be set to 
+				// the maximum number allowed by its type representation.
+				from = algorithm::min(from, src_count - 1) + 1;
+				const auto* src_data = buffers::get_data(src);
+				while (from >= length) {
+					const auto start_ptr = src_data + from - length;
+					if (memory::is_equal(pattern, start_ptr, check_size)) {
+						push(indices, from - length);
+					}
+
+					// We can only step back one position at a time
+					--from;
+				}
+
+				// If we reach this point, then, there is
+				// no matching pattern in the source array.
+				return buffers::get_count(indices);
 			}
 			
 		}

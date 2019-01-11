@@ -12,7 +12,6 @@
 namespace angie {
     namespace core {
         namespace types {
-
             using boolean = bool;
 
             using int8 = int8_t;
@@ -39,10 +38,5 @@ namespace angie {
 
 			using index = types::uint32;
         }
-
-        const types::index      invalid_index = UINT32_MAX;
-        const types::uintptr    begin_ptr = 0;			    /*!< Identifies the origin of the array */
-        const types::uintptr    end_ptr = UINTPTR_MAX;	    /*!< Identifies the end of the array */
-        const types::uintptr    not_found = UINTPTR_MAX;	/*!< Element not found */
     }
 }

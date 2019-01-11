@@ -200,7 +200,7 @@ namespace angie {
 				}
 				#endif
 
-				return invalid_index;
+				return constants::invalid_index;
 			}
 		}
 	}

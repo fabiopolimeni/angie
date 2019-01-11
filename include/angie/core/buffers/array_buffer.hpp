@@ -6,6 +6,7 @@
 
 #include "angie/core/types.hpp"
 #include "angie/core/utils.hpp"
+#include "angie/core/constants.hpp"
 #include "angie/core/diagnostics/assert.hpp"
 #include "angie/core/memory/allocator.hpp"
 #include "angie/core/memory/manipulation.hpp"
@@ -282,17 +283,13 @@ namespace angie {
 			 * @tparam T POD type
 			 * @param dst Array to clear
 			 * @param num Number of last elements to clear
-			 * @param value Byte value splatted over `data`;
-			 * by default memory will be cleared to zeros
+			 * @param value Byte value splatted over buffer's `data`
 			 */
 			template <typename T>
 			inline void clear(array_buffer<T>& dst,
-				types::size num, types::uint8 value = 0) {
-				angie_assert(get_data(dst), "Non empty arrays must have valid `data`");
-				if (num > 0) {
-					auto n_to_clear = 
-						algorithm::clamp<types::size>(num, 1, get_count(dst));
-
+				types::size num = constants::max_size, types::uint8 value = 0) {
+				if (num > 0 && get_data(dst)) {
+					auto n_to_clear = algorithm::clamp<types::size>(num, 1, get_count(dst));
 					auto start = get_count(dst) - n_to_clear;
 
 					memory::set(get_data(dst) + start, value,
@@ -448,7 +445,7 @@ namespace angie {
 			 */
 			template <typename T>
 			inline types::size write(const void* src, types::size n_bytes,
-				array_buffer<T>& dst, types::uintptr from = begin_ptr) {
+				array_buffer<T>& dst, types::uintptr from = constants::begin_ptr) {
 				angie_assert(src, "Source buffer must be valid");
 				angie_assert(from < get_count(dst));
 				angie_assert(n_bytes <= buffers::compute_size<T>(get_count(dst) - from));
@@ -474,9 +471,10 @@ namespace angie {
 			 */
 			template <typename T>
 			inline types::uintptr find_first(const T* pattern, types::size num,
-				const array_buffer<T>& src, types::uintptr from = begin_ptr) {
-				angie_assert(pattern, "Source pattern must be valid");
-				angie_assert(num, "Number of items must be greater than 0");
+				const array_buffer<T>& src, types::uintptr from = constants::begin_ptr) {
+				if (pattern == nullptr || num == 0) {
+					return constants::not_found;
+				}
 
 				const types::size check_size = compute_size<T>(num);
 
@@ -496,7 +494,7 @@ namespace angie {
 
 				// If we reach this point, then, there is
 				// no matching pattern in the source array.
-				return not_found;
+				return constants::not_found;
 			}
 
 			/**
@@ -517,14 +515,15 @@ namespace angie {
 			 */
 			template <typename T>
 			inline types::uintptr find_last(const T* pattern, types::size num,
-				const array_buffer<T>& src, types::uintptr from = end_ptr) {
-				angie_assert(pattern, "Source pattern must be valid");
-				angie_assert(num, "Number of items must be greater than 0");
+				const array_buffer<T>& src, types::uintptr from = constants::end_ptr) {
+				if (pattern == nullptr || num == 0) {
+					return constants::not_found;
+				}	
 
 				// Early exit if the source array is empty
 				const auto src_count = buffers::get_count(src);
 				if (src_count == 0){
-					return not_found;
+					return constants::not_found;
 				}
 
 				const types::size check_size = compute_size<T>(num);
@@ -547,7 +546,7 @@ namespace angie {
 
 				// If we reach this point, then, there is
 				// no matching pattern in the source array.
-				return not_found;
+				return constants::not_found;
 			}
 
         }

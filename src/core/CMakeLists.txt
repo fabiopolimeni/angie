@@ -7,6 +7,7 @@ add_library(angie_core STATIC "")
 set(HEADER_FILES
 	${ANGIE_INCLUDE_DIR}/angie/core/base.hpp
 	${ANGIE_INCLUDE_DIR}/angie/core/types.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/constants.hpp
 	${ANGIE_INCLUDE_DIR}/angie/core/config.hpp
 	${ANGIE_INCLUDE_DIR}/angie/core/defines.hpp
 	${ANGIE_INCLUDE_DIR}/angie/core/version.hpp

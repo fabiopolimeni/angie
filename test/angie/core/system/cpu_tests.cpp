@@ -30,7 +30,7 @@ TEST_CASE("CPU tests", "[cpu]")
 
 		REQUIRE(system::query_cpu_info(cpus));
 		auto core_id = system::get_current_processor();
-		REQUIRE(core_id != invalid_index);
+		REQUIRE(core_id != constants::invalid_index);
 		
 		system::release_cpu_info(cpus);
 	}
