@@ -245,7 +245,7 @@ namespace angie {
 			 * @return Element at the given position
 			 */
 			template <typename T>
-			inline const T& get(const array_buffer<T>& arr, types::uintptr at) {
+			inline T& get(const array_buffer<T>& arr, types::uintptr at) {
 				angie_assert(at < arr.count);
 				return get_data(arr)[at];
 			}
