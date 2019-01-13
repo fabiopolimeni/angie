@@ -15,8 +15,8 @@ namespace angie {
 			 *
 			 * Functions operating on this structure, assume T is a POD type.
 			 * It is responsibility of the user to guarantee that the given
-			 * dynamic_string object passed to the hereafter functions,
-			 * is in a `ready` state.
+			 * dynamic_string object passed to the hereafter functions is in
+			 * `ready` state.
 			 *
 			 * The allocator is not part of the object type. It would have
 			 * limited the usage of the class, while we want to leave the user
@@ -28,17 +28,65 @@ namespace angie {
 			 */
 			template <typename T>
 			struct dynamic_string : containers::dynamic_array<T> {
+
+				dynamic_string(const memory::allocator& allocator,
+					types::size count, types::size capacity, T* data)
+					: containers::dynamic_array<T>{
+						{allocator}, {count, capacity, data}} { }
+
+				/**
+				 * Default constructor from raw buffer.
+				 *
+				 * @eg: utf8_string str = u8"zß水🍌"
+				 * @note: `count` cannot be greater than ANGIE_MAX_FORMAT_CHARS
+				 * 
+				 * @param input Source raw buffer pointer
+				 * @param count Number of elements in the string. Bare in mind for UTF8/16
+				 * 		strings this can be bigger than the actual number of characters.
+				 * @param allocator The allocator to allocate memory for the string
+				 */
+				dynamic_string(const T* input, types::size count = 0,
+					const memory::allocator& allocator = memory::get_default_allocator()) 
+					: containers::dynamic_array<T>{{allocator}, {0, 0, nullptr}} {
+					angie_assert(input != nullptr);
+
+					// If count is not provided, we will need to count the
+					// number of bytes and compute the count ourselves.
+					if (count == 0 && input != nullptr) {
+						auto ptr = input;
+						while (*ptr++ != 0 && count++ < ANGIE_MAX_FORMAT_CHARS);
+					}
+
+					// Add 1 to the count, to make sure we have
+					// enough space to store last null character.
+					containers::from_buffer(input, count + 1, *this);
+					
+					// @fixme: Make sure last character is null.
+					buffers::set_count(*this, count);
+				}
 				
-				// This operator allows to use the string class
-				// with lvalues of const T* type, such const char*.
-				operator const T*() const { return cstr(*this); }
+				/**
+				 * This operator allows to use the string class
+				 * with lvalues of const T* type, e.g. const char*.
+				 */
+				operator T*() const { return cstr(*this); }
+
 			};
 
 			/**
-			 * Get the C string pointer.
+			 * Get the C string representation.
 			 */
 			template <typename T>
 			inline T* cstr(const dynamic_string<T>& str) {
+				const auto count = buffers::get_count(str);
+				
+				// Unfortunately, because of the inner representation
+				// of the string class, which simply inherits from a
+				// dynamic_array, we need to check whether the data
+				// buffer is big enough to hold the last '\0' char.
+				angie_assert(buffers::get_capacity(str) > count
+					&& buffers::get_data(str)[count] == '\0');
+
 				return buffers::get_data(str);
 			}
 

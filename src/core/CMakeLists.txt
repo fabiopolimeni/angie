@@ -40,9 +40,16 @@ set(COMPILATION_FILES
 # Debug
 set(SOURCE_DEBUG_FILES "")
 if (angie_debug_tools)
+
+	#if (CMAKE_BUILD_TYPE MATCHES "Debug")
+
+	add_definitions(-D_DEBUG_TOOLS)
+
     set(DBGTOOLS_DIR ../../externals/dbgtools)
     set(DBGTOOLS_DIR_INC ${DBGTOOLS_DIR}/include/dbgtools)
-    set(DBGTOOLS_DIR_SRC ${DBGTOOLS_DIR}/src)
+	set(DBGTOOLS_DIR_SRC ${DBGTOOLS_DIR}/src)
+	
+	include_directories(${DBGTOOLS_DIR}/include)
 
     target_include_directories(angie_core PRIVATE ${DBGTOOLS_DIR}/include)
 

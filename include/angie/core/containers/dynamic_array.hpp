@@ -314,7 +314,6 @@ namespace angie {
 			inline types::boolean make_space(dynamic_array<T>& dst,
 				types::uintptr from, types::size num) {
 				angie_assert(is_valid(dst));
-				angie_assert(from < SIZE_MAX);
 
 				auto new_size = buffers::get_count(dst) + num;
 

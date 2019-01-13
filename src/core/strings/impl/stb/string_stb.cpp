@@ -65,7 +65,7 @@ namespace {
 			+ alloc_size - buffer_size;
 
 		return new(heap_space) ansi_string {
-			allocator, 0, buffer_size, buffer_data
+		 	allocator, 0, buffer_size, buffer_data
 		};
 	}
 
@@ -102,6 +102,8 @@ namespace angie {
                     va_start(list, fmt);
 					
 					buffers::clear(string_result, buffers::get_count(string_result), 0);
+					//buffers::set_count(string_result, 1);
+					
 					const auto written_chars = stbsp_vsnprintf(
 						strings::cstr(string_result),
 						buffers::get_capacity(string_result),

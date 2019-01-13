@@ -17,6 +17,11 @@ TEST_CASE("String tests", "[dynamic strings]")
 
 	system::init();
 
+	SECTION("String creation") {
+		ansi_string str_a = "string with ANSI";
+		REQUIRE(buffers::get_count(str_a) == 16);
+	}
+
 	SECTION("Formatted strings") {
         int16_t number = 6993;
 		ansi_string fmt_string = format("number=%d", number);

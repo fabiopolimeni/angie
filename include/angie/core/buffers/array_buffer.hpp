@@ -237,6 +237,20 @@ namespace angie {
 			}
 
 			/**
+			 * Access data at given position.
+			 *
+			 * @tparam T POD type
+			 * @param arr Array object to check
+			 * @param at Position to access the array at
+			 * @return Element at the given position
+			 */
+			template <typename T>
+			inline const T& get(const array_buffer<T>& arr, types::uintptr at) {
+				angie_assert(at < arr.count);
+				return get_data(arr)[at];
+			}
+
+			/**
 			 * Whether or not the given array empty.
 			 *
 			 * This function does not check memory data to determine if the array
