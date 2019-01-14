@@ -19,17 +19,8 @@ namespace angie {
                  * directly from the byte count, we will have
                  * to walk through the whole list of codepoints.
                  */
-                types::size length(const dynamic_string<const types::char8>& str);
-
-                /**
-                 * Get the length of a utf8 string.
-                 *
-                 * Because a UTF8 codepoint can require one
-                 * or more bytes, we can't comput the length
-                 * directly from the byte count, we will have
-                 * to walk through the whole list of codepoints.
-                 */
-                types::size length(const dynamic_string<types::char8>& str);
+                template<typename T>
+                types::size length(const dynamic_string<T>& str);
 
             }
         }
