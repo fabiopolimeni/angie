@@ -16,13 +16,14 @@ namespace {
 	using namespace angie::core;
 	using namespace angie::core::strings;
 
-	thread_local dynamic_string<types::char8>* g_format_string = nullptr;
+	thread_local const dynamic_string<const types::char8>* g_format_string = nullptr;
 	
 	alignas(ANGIE_DEFAULT_MEMORY_ALIGNMENT)
 	thread_local types::char8 g_format_heap[
 		sizeof(dynamic_string<types::char8>) + ANGIE_MAX_FORMAT_CHARS] = {0};
 
 	void* format_alloc(types::size size, types::size alignment) {
+		memory::set(g_format_heap, 0, sizeof(g_format_heap));
 		return g_format_heap;
 	}
 
@@ -51,8 +52,9 @@ namespace {
 	 * |allocator|count|capacity|pad|data.. |
 	 * +---------+-----+--------+---+----..-+
 	 */
-	const ansi_string* create_string(types::size capacity, const memory::allocator& allocator) {
-		const types::size obj_size = sizeof(ansi_string);
+	template<typename T>
+	const dynamic_string<T>* create_string(types::size capacity, const memory::allocator& allocator) {
+		const types::size obj_size = sizeof(dynamic_string<T>);
 
 		// Because sizeof char is 1, buffer size and capacity coincide.
 		const types::size buffer_size = utils::power_of_two_ceil(capacity);
@@ -64,7 +66,7 @@ namespace {
 		types::char8* buffer_data = static_cast<types::char8*>(heap_space)
 			+ alloc_size - buffer_size;
 
-		return new(heap_space) ansi_string {
+		return new(heap_space) dynamic_string<const types::char8> {
 		 	allocator, 0, buffer_size, buffer_data
 		};
 	}
@@ -88,33 +90,28 @@ namespace angie {
     namespace core {
         namespace strings {
 
-			const dynamic_string<types::char8>& format(const types::char8* fmt, ...) {
-				if (g_format_string == nullptr) {
-					// This string will be allocated on the thread stack
-					g_format_string = const_cast<dynamic_string<types::char8>*>(
-						create_string(ANGIE_MAX_FORMAT_CHARS,
-						g_thread_format_alloc));
-				}
-					
-				dynamic_string<types::char8>& string_result = *(g_format_string);
-                if (g_format_string) {
+			const dynamic_string<const types::char8>& format(const types::char8* fmt, ...) {
+
+				// This string will be allocated on the thread stack
+				auto string_result = create_string<const types::char8>(
+					ANGIE_MAX_FORMAT_CHARS, g_thread_format_alloc);
+
+                if (string_result) {
                     va_list list;
                     va_start(list, fmt);
 					
-					buffers::clear(string_result, buffers::get_count(string_result), 0);
-					//buffers::set_count(string_result, 1);
-					
 					const auto written_chars = stbsp_vsnprintf(
-						strings::cstr(string_result),
-						buffers::get_capacity(string_result),
-						fmt, list);
-					
-						buffers::set_count(string_result, written_chars);
+						const_cast<types::char8*>(strings::cstr(*string_result)),
+						buffers::get_capacity(*string_result), fmt, list);
+
+						buffers::set_count(*(const_cast<dynamic_string<const types::char8>*>(
+							string_result)), written_chars);
 
 					va_end(list);
                 }
 
-                return string_result;
+				g_format_string = string_result;
+                return *g_format_string;
             }
 
         }

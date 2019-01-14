@@ -83,7 +83,7 @@ namespace angie {
 				// Unfortunately, because of the inner representation
 				// of the string class, which simply inherits from a
 				// dynamic_array, we need to check whether the data
-				// buffer is big enough to hold the last '\0' char.
+				// buffer is big enough to hold last '\0' character.
 				angie_assert(buffers::get_capacity(str) > count
 					&& buffers::get_data(str)[count] == '\0');
 
@@ -137,7 +137,7 @@ namespace angie {
 			 * @param msg String to format
 			 * @return Formatted string
 			 */
-			const dynamic_string<types::char8>& format(const types::char8* fmt, ...);
+			const dynamic_string<const types::char8>& format(const types::char8* fmt, ...);
             
         }
     }

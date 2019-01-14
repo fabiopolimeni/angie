@@ -18,7 +18,8 @@ namespace angie {
                  * directly from the number of bytes, as each
                  * character has a fixed size, that is, 1 byte.
                  */
-                inline types::size length(const ansi_string& str) {
+                template<typename T> inline
+                types::size length(const dynamic_string<T>& str) {
                     return buffers::get_count(str);
                 }
 

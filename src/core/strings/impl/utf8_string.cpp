@@ -33,15 +33,13 @@ namespace angie {
 		namespace strings {
             namespace utf8 {
 
-                /**
-                 * Get the length of a utf8 string.
-                 *
-                 * Because a UTF8 codepoint can require one
-                 * or more bytes, we can't compute the length
-                 * directly from the byte count, we will have
-                 * to walk through the whole list of codepoints.
-                 */
-                types::size length(const utf8_string& str) {
+                types::size length(const dynamic_string<const types::char8>& str) {
+                    //mbstate_t state = {0};
+                    //return mbsrtowcs(nullptr, &str.data, 0, &state);
+                    return strlen_mb(str, buffers::get_count(str));
+                }
+
+                types::size length(const dynamic_string<types::char8>& str) {
                     //mbstate_t state = {0};
                     //return mbsrtowcs(nullptr, &str.data, 0, &state);
                     return strlen_mb(str, buffers::get_count(str));
