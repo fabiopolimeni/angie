@@ -321,6 +321,17 @@
 #endif
 
 /**
+ * This is something I don't like from C++11, the fact that
+ * the initializer_list, it is part of the standard library
+ * but its usage makes it looks like part of the language.
+ * As we assume the compiler needs to be C++11 compliant I
+ * don't know whether this is relevant or not, although, if
+ * your compiler doesn't include <initializer_list> you can
+ * still use its functionalities, from angie/core/initialize.hpp.
+ */
+#define ANGIE_HAVE_CPP11_INITIALIZER_LIST
+
+/**
  * Whether or not the given pointer "p" is aligned to, or multiple of, "c"
  *
  * @def angie_is_aligned(p, c)
@@ -355,6 +366,9 @@
 #define IS_DEFINED__(comma) IS_DEFINED___(comma 1, 0)
 #define IS_DEFINED___(_, v, ...) v
 
+/**
+ * Whether a unsigned integer is power of 2 or not
+ */
 #define angie_is_pow2(x) (x && !(x & (x - 1)))
 
 #ifdef __cplusplus

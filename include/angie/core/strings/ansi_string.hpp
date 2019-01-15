@@ -20,7 +20,7 @@ namespace angie {
                  */
                 template<typename T> inline
                 types::size length(const dynamic_string<T>& str) {
-                    return buffers::get_count(str);
+                    return buffers::get_count(str) - 1;
                 }
 
             }

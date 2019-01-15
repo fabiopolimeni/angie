@@ -250,7 +250,7 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		containers::dynamic_array<types::char8> str_a;
 
 		containers::dynamic_array<types::char8> phrase_a;
-		containers::from_buffer("Lore Ipsum est", 14, phrase_a);
+		containers::add_from_buffer("Lore Ipsum est", 14, phrase_a);
 
 		REQUIRE(containers::copy(str_a, phrase_a));
 		REQUIRE(buffers::equal(str_a, phrase_a));
@@ -260,10 +260,10 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		containers::dynamic_array<types::char8> str_a;
 
 		containers::dynamic_array<types::char8> name_a;
-		containers::from_buffer("Fabio", 5, name_a);
+		containers::add_from_buffer("Fabio", 5, name_a);
 
 		containers::dynamic_array<types::char8> surname_a;
-		containers::from_buffer("Polimeni", 8, surname_a);
+		containers::add_from_buffer("Polimeni", 8, surname_a);
 
 		// [?,P,o,l,i,m,e,n,i]
 		REQUIRE(containers::insert(str_a, 1, surname_a));
@@ -280,7 +280,7 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		containers::dynamic_array<types::char8> str_a;
 
 		containers::dynamic_array<types::char8> phrase_a;
-		containers::from_buffer("Lore Ipsum est", 14, phrase_a);
+		containers::add_from_buffer("Lore Ipsum est", 14, phrase_a);
 
 		REQUIRE(containers::append(str_a, phrase_a));
 		REQUIRE(buffers::equal(str_a, phrase_a));
@@ -304,7 +304,7 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		containers::dynamic_array<types::char8> str_a;
 
 		containers::init(str_a);
-		REQUIRE(containers::from_buffer("Lore", 4, str_a));
+		REQUIRE(containers::add_from_buffer("Lore", 4, str_a));
 		
 		REQUIRE(containers::push(str_a, ' '));
 		REQUIRE(containers::push(str_a, 'I'));
@@ -333,7 +333,7 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 
 	SECTION("Find in buffer") {
 		containers::dynamic_array<types::char8> str_a;
-		REQUIRE(!!containers::from_buffer("Lore ipsum Lore opsum", 21, str_a));
+		REQUIRE(!!containers::add_from_buffer("Lore ipsum Lore opsum", 21, str_a));
 
 		REQUIRE(buffers::find_first("Lore", 4, str_a) == 0);
 		REQUIRE(buffers::find_first("sum", 3, str_a) == 7);
@@ -342,7 +342,7 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 		REQUIRE(buffers::find_last("sum", 3, str_a, 5) == constants::not_found);
 
 		buffers::clear(str_a);
-		REQUIRE(!!containers::from_buffer("ababab", 6, str_a));
+		REQUIRE(!!containers::add_from_buffer("ababab", 6, str_a));
 		
 		containers::dynamic_array<types::uintptr> indices;
 
@@ -361,5 +361,21 @@ TEST_CASE("Dynamic array tests", "[dynamic_array]")
 
 		containers::release(str_a);
 		containers::release(indices);
+	}
+
+	SECTION("Arrays interleave") {
+		const containers::dynamic_array<
+			containers::dynamic_array<int32_t>> dmy = {
+			{15}, {12}, {19}
+		};
+
+		containers::dynamic_array<const int32_t> zero = {0};
+		containers::dynamic_array<int32_t> date;
+		REQUIRE(containers::interleave(dmy, date, zero) == 5);
+		REQUIRE(buffers::get(date, 0) == 15);
+		REQUIRE(buffers::get(date, 1) == 0);
+		REQUIRE(buffers::get(date, 2) == 12);
+		REQUIRE(buffers::get(date, 3) == 0);
+		REQUIRE(buffers::get(date, 4) == 19);
 	}
 }

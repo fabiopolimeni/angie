@@ -12,6 +12,7 @@ set(HEADER_FILES
 	${ANGIE_INCLUDE_DIR}/angie/core/defines.hpp
 	${ANGIE_INCLUDE_DIR}/angie/core/version.hpp
 	${ANGIE_INCLUDE_DIR}/angie/core/utils.hpp
+	${ANGIE_INCLUDE_DIR}/angie/core/initializer.hpp
 	${ANGIE_INCLUDE_DIR}/angie/core/algorithm.hpp)
 
 set(INTERFACE_FILES

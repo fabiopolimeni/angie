@@ -9,6 +9,7 @@
 #include "angie/core/types.hpp"
 #include "angie/core/utils.hpp"
 #include "angie/core/constants.hpp"
+#include "angie/core/initializer.hpp"
 #include "angie/core/diagnostics/assert.hpp"
 #include "angie/core/algorithm.hpp"
 #include "angie/core/memory/allocator.hpp"
@@ -29,8 +30,8 @@ namespace angie {
 			 * is in a `ready` state.
 			 *
 			 * The allocator is not part of the object type, because it would
-			 * have limited its usage, while we want to leave the user
-			 * to decide which one is the most appropriate at any given time.
+			 * have limited its usage, while we want to leave the user to decide
+			 * which one is the most appropriate at any given time.
 			 * If the allocator is null, then we assume we can't manipulate the
 			 * array as memory cannot be requested or release internally, but
 			 * we can still use this to retrieve or copy data. It is a useful
@@ -42,6 +43,19 @@ namespace angie {
 			struct dynamic_array :
 				buffers::array_allocator,
 				buffers::array_buffer<T> {
+
+				dynamic_array(const memory::allocator& allocator
+						= memory::get_default_allocator(),
+					types::size count = 0, types::size capacity = 0,
+					T* data = nullptr) noexcept
+					: buffers::array_allocator{allocator}
+					, buffers::array_buffer<T>{count, capacity, data}
+					{ }
+
+				dynamic_array(initializer<T> list) noexcept {
+					create_from_buffer(list.begin(),
+						buffers::compute_size<T>(list.size()), *this);
+				}
 			};
 
 			/**
@@ -71,6 +85,11 @@ namespace angie {
 				}
 			}
 
+			template <typename T>
+			inline memory::allocator get_allocator(const dynamic_array<T>& arr) {
+				return arr.allocator;
+			}
+
 			/**
 			 * Whether or not the given array is in ready state.
 			 *
@@ -87,7 +106,7 @@ namespace angie {
 			}
 
 			/**
-			 * Release memory and zero array's properties.
+			 * Releases the memory and zeros array's properties.
 			 *
 			 * @tparam T POD type
 			 * @param arr Array to empty
@@ -166,17 +185,6 @@ namespace angie {
 				}
 
 				return containers::reserve(arr, num);
-			}
-
-			template<typename T>
-			inline dynamic_array<T> make_dynamic_array(types::size num = 0,
-				const memory::allocator& allocator = memory::get_default_allocator()) {
-				dynamic_array<T> new_array = {
-					allocator, 0, 0, nullptr
-				};
-
-				init(new_array, num);
-				return new_array;
 			}
 
 			/**
@@ -283,8 +291,7 @@ namespace angie {
 
 				// Either both `capacity` and `data` are null,
 				// or both need to be valid.
-				if ((new_capacity && new_data)
-					|| (!new_capacity && !new_data)) {
+				if ((new_capacity && new_data) || (!new_capacity && !new_data)) {
 					dst.data = new_data;
 					dst.count = new_size;
 					dst.capacity = new_capacity;
@@ -315,16 +322,16 @@ namespace angie {
 				types::uintptr from, types::size num) {
 				angie_assert(is_valid(dst));
 
-				auto new_size = buffers::get_count(dst) + num;
+				auto old_count = buffers::get_count(dst);
+				auto new_size = old_count + num;
 
 				// Because we want to insert uninitialized elements starting
 				// at a point which would overflow otherwise, adjust for the
 				// new size, taking into account the resulting padding.
-				if (from > buffers::get_count(dst)) {
-					new_size += from - buffers::get_count(dst);
+				if (from > old_count) {
+					new_size += from - old_count;
 				}
 
-				auto old_count = buffers::get_count(dst);
 				if (new_size && resize(dst, new_size)) {
 					// In case we are inserting somewhere in the middle of the
 					// array, then, we need to move the right part of the split
@@ -332,20 +339,18 @@ namespace angie {
 					if (from < old_count) {
 						// Following logic is needed to respect the assumption
 						// that we can manipulate overlapping memory buffers.
-						auto count = algorithm::min(
-							buffers::get_count(dst) - old_count,
-							buffers::get_count(dst) - from + num);
-						
+						auto count = algorithm::min(num, old_count - from);
 						auto end = buffers::get_count(dst) - count;
-						auto begin = end - count;
+						auto begin = old_count - count;
+
+						// Iterate backward
 						while (count > 0) {
 							// Move as much as memory in one call
 							memory::move(buffers::get_data(dst) + end,
 								buffers::get_data(dst) + begin,
 								buffers::compute_size<T>(count));
 							
-							auto diff = algorithm::min(count, begin - from);
-							count = diff;
+							count = algorithm::min(count, begin - from);
 
 							end -= count;
 							begin -= count;
@@ -362,8 +367,8 @@ namespace angie {
 			/**
 			 * Add `num` `elem`s, starting at `from`.
 			 *
-			 * This function will add a new set of elements, and will resize the
-			 * memory if necessary. You can add elements starting from an
+			 * This function will add a new set of elements, and will resize
+			 * the memory if necessary. You can add elements starting from an
 			 * arbitrary position, even greater than the current size, in such
 			 * case the array will resize to `from` + `num`. In the latter case
 			 * elements from 0 to `from` will be left uninitialized.
@@ -457,10 +462,10 @@ namespace angie {
 			 * @param n_bytes Number of bytes to write
 			 * @param dst Destination buffer
 			 * @param at Position where starting to write from
-			 * @return true if successful, false otherwise
+			 * @return The number of written bytes
 			 */
 			template <typename T>
-			inline types::size from_buffer(const void* src, types::size n_bytes,
+			inline types::size add_from_buffer(const void* src, types::size n_bytes,
 				dynamic_array<T>& dst, types::uintptr at = constants::begin_ptr) {
 				angie_assert(src, "Source buffer must be not-null");
 				
@@ -469,6 +474,83 @@ namespace angie {
 				}
 				
 				return 0;
+			}
+			
+			/**
+			 * Create an array from the given buffer.
+			 *
+			 * This function will allocate new memory to accommodate the data
+			 * in the source buffer and will copy its content into the the new array.
+			 * Because a new array is created, contrary from `add_from_buffer()`
+			 * function, which reallocates memory instead, this function will allow
+			 * for the creation of arrays of const types.
+			 *
+			 * @tparam T POD type
+			 * @param src Source buffer to copy from
+			 * @param n_bytes Number of bytes to write
+			 * @param dst Destination buffer
+			 * @param at Position where starting to write from
+			 * @return The number of written bytes
+			 */
+			template <typename T>
+			inline types::size create_from_buffer(
+				const void* src, types::size n_bytes, dynamic_array<T>& dst) {
+				angie_assert(src, "Source buffer must be not-null");
+				
+				auto new_count = buffers::compute_count<T>(n_bytes);
+				auto new_capacity = buffers::compute_capacity(new_count);
+				auto* new_data = dst.allocator.alloc(
+					buffers::compute_size<T>(new_capacity),
+					buffers::get_type_alignment<T>());
+
+				if (new_data != nullptr) {
+					auto copied_bytes = memory::copy(new_data, src, n_bytes);
+
+					buffers::set_data(dst, static_cast<T*>(new_data));
+					buffers::set_capacity(dst, new_capacity);
+					buffers::set_count(dst, new_count);
+					return copied_bytes;
+				}
+
+				return  0;
+			}
+
+			/**
+			 * Create an array from the given raw array.
+			 *
+			 * This function will allocate new memory to accommodate the data
+			 * in the source buffer and will copy its content into the the new array.
+			 * Because memory is newly allocated, this function will allow for the
+			 * creation of arrays of const types.
+			 *
+			 * @tparam T POD type
+			 * @param src Source buffer to copy from
+			 * @param count Number of elements to copy from src
+			 * @param dst Destination buffer
+			 * @param at Position where starting to write from
+			 * @return The number of elements in the new array
+			 */
+			template <typename T>
+			inline types::size create_from_array(
+				T* src, types::size count, dynamic_array<T>& dst) {
+				angie_assert(src, "Source buffer must be not-null");
+				
+				auto new_capacity = buffers::compute_capacity(count);
+				auto* new_data = dst.allocator.alloc(
+					buffers::compute_size<T>(new_capacity),
+					buffers::get_type_alignment<T>());
+
+				if (new_data != nullptr) {
+					auto new_count = buffers::compute_count<T>(memory::copy(
+						new_data, src, buffers::compute_size<T>(count)));
+
+					buffers::set_data(dst, static_cast<T*>(new_data));
+					buffers::set_capacity(dst, new_capacity);
+					buffers::set_count(dst, new_count);
+					return new_count;
+				}
+
+				return  0;
 			}
 
 			/**
@@ -492,7 +574,7 @@ namespace angie {
 			template <typename T, typename U>
 			inline types::size copy(dynamic_array<T>& dst,
 				const dynamic_array<U>& src, types::uintptr from = constants::begin_ptr,
-				types::size num = SIZE_MAX) {
+				types::size num = constants::max_size) {
                 static_assert(sizeof(T) == sizeof(U));
 				angie_assert(from < buffers::get_count(src));
 				angie_assert(is_empty(dst));
@@ -529,7 +611,7 @@ namespace angie {
 			template <typename T, typename U>
 			inline types::size insert(dynamic_array<T>& dst, types::uintptr at,
 				const dynamic_array<U>& src, types::uintptr from = constants::begin_ptr,
-				types::size num = SIZE_MAX) {
+				types::size num = constants::max_size) {
                 static_assert(sizeof(T) == sizeof(U));
 				angie_assert(is_valid(dst));
 				angie_assert(from < buffers::get_count(src));
@@ -641,7 +723,7 @@ namespace angie {
 			inline types::boolean pop(dynamic_array<T>& dst, T& elem) {
 				angie_assert(is_valid(dst));
 
-				if (const auto count = buffers::get_count(dst) > 0) {
+				if (const auto count = buffers::get_count(dst)) {
 					//elem = at(dst, count - 1);
 					if (!memory::copy(&elem,
 						buffers::get_data(dst) + count - 1, sizeof(T))) {
@@ -757,6 +839,42 @@ namespace angie {
 				// If we reach this point, then, there is
 				// no matching pattern in the source array.
 				return buffers::get_count(indices);
+			}
+
+			/**
+			 * This function joins an array of arrays into a single one.
+			 * 
+			 * @param src Source array of arrays which will be joined into one
+			 * @param dst The final destination array formed from the join
+			 * @param sep Separator array to insert between ith-ed arrays
+			 * @return The number of new elements added to the destination array
+			 */
+			template<typename T, typename U, typename C>
+			types::size interleave(const dynamic_array<dynamic_array<T>>& src,
+				dynamic_array<U>& dst, const dynamic_array<C>& sep) {
+				static_assert(sizeof(T) == sizeof(U));
+				static_assert(sizeof(U) == sizeof(C));
+				const auto src_count = buffers::get_count(src);
+				if (src_count == 0) {
+					return 0;
+				}
+				
+				// The destination array, won't be cleared, therefore,
+				// we need to keep an extra variable to store the number
+				// of new elements added.
+				auto added_elements = 0;
+				for(types::size i = 0; i < src_count; ++i) {					
+					// Append ith source array to destination
+					added_elements += append(dst, src[i]);
+
+					// If this is not last source array, then,
+					// add the separator to the destination.
+					if (i != src_count - 1) {
+						added_elements += append(dst, sep);
+					}
+				}
+
+				return added_elements;
 			}
 			
 		}

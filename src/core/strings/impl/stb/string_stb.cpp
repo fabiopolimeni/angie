@@ -105,7 +105,7 @@ namespace angie {
 						buffers::get_capacity(*string_result), fmt, list);
 
 						buffers::set_count(*(const_cast<dynamic_string<const types::char8>*>(
-							string_result)), written_chars);
+							string_result)), written_chars + 1);
 
 					va_end(list);
                 }

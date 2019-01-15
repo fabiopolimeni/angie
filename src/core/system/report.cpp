@@ -44,9 +44,9 @@ assert_action assert_callback(const char* cond, const char* msg,
 extern "C" void atexit_callback() {
 	using namespace angie::core::system;
 	using namespace angie::core;
-	auto report_settings = report::get_settings();
 
 #ifdef ANGIE_DEBUG_TOOLS
+	auto report_settings = report::get_settings();
 	if (report_settings.callstack_at_exit) {
 		const static auto max_addresses = 16u;
 		void* addresses[max_addresses] = { nullptr };
